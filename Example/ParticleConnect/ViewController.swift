@@ -14,9 +14,11 @@ class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        let vc = FindDeviceViewController()
-        vc.view.backgroundColor = .white
-        present(vc, animated: true, completion: nil)
+        let viewController = FindDeviceViewController()
+        viewController.view.backgroundColor = .white
+        
+        let navigationController = UINavigationController(rootViewController: viewController)
+        present(navigationController, animated: true, completion: nil)
     }
 }
 

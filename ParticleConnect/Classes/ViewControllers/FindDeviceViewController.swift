@@ -17,10 +17,6 @@ public class FindDeviceViewController: UIViewController {
     }()
     
     fileprivate var communicationManager: DeviceCommunicationManager?
-    fileprivate var deviceId: String = ""
-    
-    fileprivate var deviceConnectRetryCount: Int = 0
-    
     
     // MARK: Life cycle
     
@@ -31,7 +27,7 @@ public class FindDeviceViewController: UIViewController {
     
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        wifi.startMonitoringConnection()
+        wifi.startMonitoringConnectionInForeground()
     }
     
     override public func viewWillDisappear(_ animated: Bool) {
@@ -62,23 +58,21 @@ public class FindDeviceViewController: UIViewController {
     // MARK: Navigation
     
     func onConnectionHandler(state: UIApplicationState) {
+        print("Connected to device: \(state)")
         if state == .background || state == .inactive {
             displayLocalNotification()
         }
         if state == .active {
             wifi.stopMonitoringConnection()
             print("connected in the foreground")
-//            getDeviceId { [weak self] id in
-//                print("device id: \(id)")
-//                self?.getPublicKey { [weak self] in
-//                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-//                        print("got our public key!")
-//                        let networkViewController = SelectNetworkViewController()
-//                        networkViewController.deviceId = id
-//                        self?.navigationController?.pushViewController(networkViewController, animated: true)
-//                    }
-//                }
-//            }
+            
+            getDeviceId { [weak self] deviceId in
+                print("device id: \(deviceId)")
+                self?.getPublicKey { [weak self] in
+                    let viewController = SelectNetworkViewController()
+                    self?.navigationController?.pushViewController(viewController, animated: true)
+                }
+            }
         }
     }
     
@@ -86,47 +80,44 @@ public class FindDeviceViewController: UIViewController {
     // MARK: -
     
     private func getDeviceId(completion: @escaping (String) -> Void) {
-//        communicationManager = DeviceCommunicationManager()
-//        communicationManager?.sendCommand(Command.Device.self) { [weak self] result in
-//            switch result {
-//            case .success(let value):
-//                completion(value.deviceId)
-//            case .failure(let error):
-//                if error == ConnectionError.timeout {
-//                    if self != nil && self!.deviceConnectRetryCount >= 5 {
-//                        self?.showConnectionFailureAlert()
-//                        return
-//                    }
-//                    self?.deviceConnectRetryCount += 1
-//                    self?.wifi.startMonitoringConnectionInForeground()
-//                } else {
-//                    self?.showConnectionFailureAlert()
-//                }
-//            }
-//        }
+        communicationManager = DeviceCommunicationManager()
+        communicationManager?.sendCommand(Command.Device.self) { [weak self] result in
+            switch result {
+            case .success(let value):
+                completion(value.deviceId)
+            case .failure(let error):
+                print(error)
+                if error == ConnectionError.timeout {
+                    if self != nil {
+                        self?.showFailureAlert("Could not get the device ID (timeout)")
+                        return
+                    }
+                } else {
+                    self?.showFailureAlert("Could not get the device ID")
+                }
+            }
+        }
     }
     
     private func getPublicKey(completion: @escaping () -> Void) {
-//        communicationManager = DeviceCommunicationManager()
-//        communicationManager!.sendCommand(Command.PublicKey.self) { [weak self] result in
-//            switch result {
-//            case .success:
-//                completion()
-//            case .failure:
-//                self?.wifi.startMonitoringConnectionInForeground()
-//            }
-//        }
+        communicationManager = DeviceCommunicationManager()
+        communicationManager!.sendCommand(Command.PublicKey.self) { [weak self] result in
+            switch result {
+            case .success:
+                print("public key: \(result)")
+                completion()
+            case .failure:
+                self?.showFailureAlert("Could not get the public key")
+            }
+        }
     }
     
     
     // MARK: -
     
-    private func showConnectionFailureAlert() {
-        let action = UIAlertAction(title: "Try again", style: .default) { action in
-            _ = self.navigationController?.popViewController(animated: true)
-        }
-        
-        let alert = UIAlertController(title: "Could not connect", message: "We're having trouble connecting to your device. Double check your device is on and ready to connect (blinking blue).", preferredStyle: .alert)
+    private func showFailureAlert(_ message: String) {
+        let action = UIAlertAction(title: "Damn", style: .default)
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         
         alert.addAction(action)
         

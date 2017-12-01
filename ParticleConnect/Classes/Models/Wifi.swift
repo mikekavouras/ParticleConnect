@@ -16,11 +16,7 @@ public class Wifi {
     public init(_ connectionBlock: @escaping (UIApplicationState) -> Void) {
         self.onConnectionHandler = connectionBlock
         NotificationCenter.default.addObserver(self, selector: #selector(startMonitoringConnectionInForeground), name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
-    }
-    
-    public func startMonitoringConnection() {
-        startMonitoringConnectionInForeground()
-        startMonitoringConnectionInBackground()
+        NotificationCenter.default.addObserver(self, selector: #selector(startMonitoringConnectionInBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
     }
     
     public func stopMonitoringConnectionInForeground() {
@@ -36,7 +32,7 @@ public class Wifi {
     // MARK: - Private
     
     static let foregroundTimerInterval = 1.0
-    static let backgroundTimerInterval = 2.0
+    static let backgroundTimerInterval = 1.0
     
     private let onConnectionHandler: (UIApplicationState) -> Void
     private var foregroundTimer: Timer?
@@ -44,7 +40,9 @@ public class Wifi {
     
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier? = nil
     
-    @objc private func startMonitoringConnectionInForeground() {
+    @objc public func startMonitoringConnectionInForeground() {
+        stopMonitoringConnectionInBackground()
+        
         foregroundTimer?.invalidate()
         foregroundTimer = nil
         foregroundTimer = Timer(timeInterval: Wifi.foregroundTimerInterval, target: self, selector: #selector(checkDeviceWifiConnection(timer:)), userInfo: nil, repeats: true)
@@ -57,7 +55,9 @@ public class Wifi {
         }
     }
     
-    private func startMonitoringConnectionInBackground() {
+    @objc private func startMonitoringConnectionInBackground() {
+        stopMonitoringConnectionInForeground()
+        
         backgroundTimer?.invalidate()
         backgroundTimer = nil
         backgroundTimer = Timer(timeInterval: Wifi.backgroundTimerInterval, target: self, selector: #selector(checkDeviceConnectionForNotification(timer:)), userInfo: nil, repeats: true)
@@ -77,6 +77,8 @@ public class Wifi {
     }
     
     @objc private func checkDeviceConnectionForNotification(timer: Timer) {
+        print("checking connection in the background")
+        
         let state = UIApplication.shared.applicationState
         guard state == .background || state == .inactive,
             Wifi.isDeviceConnected(.photon) else { return }
@@ -87,6 +89,8 @@ public class Wifi {
     }
     
     @objc private func checkDeviceWifiConnection(timer: Timer) {
+        print("checking connection in the foreground")
+
         let state = UIApplication.shared.applicationState
         guard state == .active,
             Wifi.isDeviceConnected(.photon) else { return }

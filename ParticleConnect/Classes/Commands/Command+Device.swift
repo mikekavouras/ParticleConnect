@@ -7,9 +7,9 @@
 
 extension Command {
     public struct Device: ParticleCommunicable {
-        static var command: String = "device-id\n0\n\n"
+        public static var command: String = "device-id\n0\n\n"
         
-        internal static func parse(_ json: [AnyHashable: Any]) -> (deviceId: String, claimed: Bool)? {
+        public static func parse(_ json: [AnyHashable: Any]) -> (deviceId: String, claimed: Bool)? {
             guard let id = json["id"] as? String,
                 let c = json["c"] as? String,
                 let cInt = Int(c) else
