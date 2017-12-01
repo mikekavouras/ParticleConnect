@@ -17,6 +17,7 @@ public class FindDeviceViewController: UIViewController {
     }()
     
     fileprivate var communicationManager: DeviceCommunicationManager?
+    private var retryCount = 0
     
     // MARK: Life cycle
     
@@ -66,18 +67,22 @@ public class FindDeviceViewController: UIViewController {
             wifi.stopMonitoringConnection()
             print("connected in the foreground")
             
-            getDeviceId { [weak self] deviceId in
-                print("device id: \(deviceId)")
-                self?.getPublicKey { [weak self] in
-                    let viewController = SelectNetworkViewController()
-                    self?.navigationController?.pushViewController(viewController, animated: true)
-                }
-            }
+            fetchDeviceId()
         }
     }
     
     
     // MARK: -
+    
+    private func fetchDeviceId() {
+        getDeviceId { [weak self] deviceId in
+            print("device id: \(deviceId)")
+            self?.getPublicKey { [weak self] in
+                let viewController = SelectNetworkViewController()
+                self?.navigationController?.pushViewController(viewController, animated: true)
+            }
+        }
+    }
     
     private func getDeviceId(completion: @escaping (String) -> Void) {
         communicationManager = DeviceCommunicationManager()
@@ -88,9 +93,11 @@ public class FindDeviceViewController: UIViewController {
             case .failure(let error):
                 print(error)
                 if error == ConnectionError.timeout {
-                    if self != nil {
+                    if self != nil && self!.retryCount < 2 {
+                        self?.retryCount += 1
+                        self?.fetchDeviceId()
+                    } else {
                         self?.showFailureAlert("Could not get the device ID (timeout)")
-                        return
                     }
                 } else {
                     self?.showFailureAlert("Could not get the device ID")
