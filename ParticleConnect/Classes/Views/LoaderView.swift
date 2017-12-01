@@ -8,24 +8,53 @@
 
 import UIKit
 
-public class LoaderView: UIView {
-    private let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
+class LoaderView: UIView {
+    let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
+    let textLabel: UILabel = {
+        let label = UILabel(frame: .zero)
+        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 13, weight: .medium)
+        label.textAlignment = .center
+        return label
+    }()
     
-    override public init(frame: CGRect) {
+    override init(frame: CGRect) {
         super.init(frame: frame)
+        backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        layer.cornerRadius = 8.0
+        alpha = 0.0
         
         addSubview(activityIndicator)
+        addSubview(textLabel)
         
-        backgroundColor = UIColor.black.withAlphaComponent(0.7)
-        layer.cornerRadius = 4.0
-        alpha = 0.0
+        textLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        textLabel.textColor = .white
+        textLabel.textAlignment = .center
+        
+        let viewMargins = layoutMarginsGuide
+        
+        activityIndicator.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor).isActive = true
+        activityIndicator.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor).isActive = true
+        activityIndicator.topAnchor.constraint(equalTo: viewMargins.topAnchor, constant: 8).isActive = true
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        
+        let activityIndicatorMargins = activityIndicator.layoutMarginsGuide
+        
+        textLabel.topAnchor.constraint(equalTo: activityIndicatorMargins.bottomAnchor, constant: 16).isActive = true
+        textLabel.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor).isActive = true
+        textLabel.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor).isActive = true
+        textLabel.bottomAnchor.constraint(equalTo: viewMargins.bottomAnchor).isActive = true
+        textLabel.heightAnchor.constraint(equalToConstant: 30.0).isActive = true
+        textLabel.widthAnchor.constraint(equalToConstant: 160).isActive = true
+        textLabel.translatesAutoresizingMaskIntoConstraints = false
     }
-    
-    required public init?(coder aDecoder: NSCoder) {
+
+    required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func show() {
+    func show(_ initialText: String) {
+        textLabel.text = initialText
         activityIndicator.startAnimating()
         UIViewPropertyAnimator(duration: 0.3, curve: .easeOut) {
             self.alpha = 1.0
@@ -39,10 +68,15 @@ public class LoaderView: UIView {
             }.startAnimation()
     }
     
-    override public func layoutSubviews() {
-        let margins = layoutMarginsGuide
-        activityIndicator.centerXAnchor.constraint(equalTo: margins.centerXAnchor).isActive = true
-        activityIndicator.centerYAnchor.constraint(equalTo: margins.centerYAnchor).isActive = true
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+    func setText(_ text: String) {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.textLabel.alpha = 0.0
+        }) { _ in
+            self.textLabel.text = text
+            UIView.animate(withDuration: 0.3, animations: {
+                self.textLabel.alpha = 1.0
+            })
+        }
     }
 }
+

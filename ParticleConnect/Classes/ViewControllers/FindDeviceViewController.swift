@@ -10,6 +10,8 @@ import UserNotifications
 
 public class FindDeviceViewController: UIViewController {
     
+    let loaderView = LoaderView(frame: .zero)
+    
     fileprivate lazy var wifi: Wifi = {
         return Wifi { [weak self] state in
             self?.onConnectionHandler(state: state)
@@ -24,20 +26,37 @@ public class FindDeviceViewController: UIViewController {
     public override func viewDidLoad() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { allowed, error in }
         UIApplication.shared.registerForRemoteNotifications()
+        
+        setup()
     }
     
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         wifi.startMonitoringConnectionInForeground()
+        
+        loaderView.show("Searching for device")
     }
     
     override public func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         wifi.stopMonitoringConnectionInForeground()
+        
+        loaderView.hide()
     }
     
     deinit {
         wifi.stopMonitoringConnection()
+    }
+    
+    // MARK: Setup
+    
+    private func setup() {
+        view.addSubview(loaderView)
+        
+        let margin = view.layoutMarginsGuide
+        loaderView.centerYAnchor.constraint(equalTo: margin.centerYAnchor, constant: -60).isActive = true
+        loaderView.centerXAnchor.constraint(equalTo: margin.centerXAnchor).isActive = true
+        loaderView.translatesAutoresizingMaskIntoConstraints = false
     }
     
     
@@ -67,10 +86,11 @@ public class FindDeviceViewController: UIViewController {
             wifi.stopMonitoringConnection()
             print("connected in the foreground")
             
+            loaderView.setText("Getting device ID")
+            
             fetchDeviceId()
         }
     }
-    
     
     // MARK: -
     

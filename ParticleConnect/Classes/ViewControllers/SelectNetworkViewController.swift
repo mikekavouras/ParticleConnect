@@ -28,7 +28,7 @@ public class SelectNetworkViewController: UIViewController, UITableViewDataSourc
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        loaderView.show()
+        loaderView.show("Looking for networks")
         
         scanForNetworks { foundNetworks in
             self.networks = foundNetworks
@@ -69,8 +69,6 @@ public class SelectNetworkViewController: UIViewController, UITableViewDataSourc
         loaderView.translatesAutoresizingMaskIntoConstraints = false
         loaderView.centerXAnchor.constraint(equalTo: margins.centerXAnchor).isActive = true
         loaderView.centerYAnchor.constraint(equalTo: margins.centerYAnchor, constant: -50.0).isActive = true
-        loaderView.widthAnchor.constraint(equalToConstant: 60.0).isActive = true
-        loaderView.heightAnchor.constraint(equalToConstant: 60.0).isActive = true
     }
 
     private func scanForNetworks(completion: @escaping ([Network]) -> Void) {
