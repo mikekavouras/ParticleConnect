@@ -1,0 +1,6 @@
+framework module Pods_ParticleConnect_Tests {
+  umbrella header "Pods-ParticleConnect_Tests-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -2,7 +2,7 @@
 
 import Quick
 import Nimble
-import ParticleConnect
+//import ParticleConnect
 
 class TableOfContentsSpec: QuickSpec {
     override func spec() {

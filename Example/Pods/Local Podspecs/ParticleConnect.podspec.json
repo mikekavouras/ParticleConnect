@@ -1,0 +1,22 @@
+{
+  "name": "ParticleConnect",
+  "version": "0.1.0",
+  "summary": "A simple framework to connect Particle hardware to the Internet",
+  "description": "A simple framework to connect Particle hardware to the greater Internet",
+  "homepage": "https://github.com/mikekavouras/ParticleConnect",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "mikekavouras": "kavourasm@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/mikekavouras/ParticleConnect.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "10.0"
+  },
+  "source_files": "ParticleConnect/Classes/**/*"
+}

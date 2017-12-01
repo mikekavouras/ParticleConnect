@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
   s.name             = 'ParticleConnect'
   s.version          = '0.1.0'
-  s.summary          = 'A short description of ParticleConnect.'
+  s.summary          = 'A simple framework to connect Particle hardware to the Internet'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -18,20 +18,20 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+A simple framework to connect Particle hardware to the greater Internet
                        DESC
 
-  s.homepage         = 'https://github.com/d8915d4c64a5f9654c7e3ca0a00fcac82db05acc/ParticleConnect'
+  s.homepage         = 'https://github.com/mikekavouras/ParticleConnect'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'd8915d4c64a5f9654c7e3ca0a00fcac82db05acc' => 'kavourasm@gmail.com' }
-  s.source           = { :git => 'https://github.com/d8915d4c64a5f9654c7e3ca0a00fcac82db05acc/ParticleConnect.git', :tag => s.version.to_s }
+  s.author           = { 'mikekavouras' => 'kavourasm@gmail.com' }
+  s.source           = { :git => 'https://github.com/mikekavouras/ParticleConnect.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '10.0'
 
   s.source_files = 'ParticleConnect/Classes/**/*'
-  
+
   # s.resource_bundles = {
   #   'ParticleConnect' => ['ParticleConnect/Assets/*.png']
   # }

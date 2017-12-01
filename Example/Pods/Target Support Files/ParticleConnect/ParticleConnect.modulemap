@@ -1,0 +1,6 @@
+framework module ParticleConnect {
+  umbrella header "ParticleConnect-umbrella.h"
+
+  export *
+  module * { export * }
+}

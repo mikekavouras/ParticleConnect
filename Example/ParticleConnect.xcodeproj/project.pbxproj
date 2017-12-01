@@ -40,11 +40,11 @@
 		607FACE51AFB9204008FA782 /* ParticleConnect_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParticleConnect_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
-		69925811F4ABF15357E8335A /* ParticleConnect.podspec */ = {isa = PBXFileReference; includeInIndex = 1; name = ParticleConnect.podspec; path = ../ParticleConnect.podspec; sourceTree = "<group>"; };
-		974938D23F69307251C5E58B /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		69925811F4ABF15357E8335A /* ParticleConnect.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = ParticleConnect.podspec; path = ../ParticleConnect.podspec; sourceTree = "<group>"; };
+		974938D23F69307251C5E58B /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		97FEE04006087C7855B36920 /* Pods_ParticleConnect_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ParticleConnect_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E49772F16E7DE310FC226C9 /* Pods-ParticleConnect_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ParticleConnect_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ParticleConnect_Tests/Pods-ParticleConnect_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		9E6E853D42F42EB4545FE1BA /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		9E6E853D42F42EB4545FE1BA /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		C7B75E73978A0DE27C8E1375 /* Pods-ParticleConnect_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ParticleConnect_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ParticleConnect_Example/Pods-ParticleConnect_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		DFFA9E6C0161A72F468F80FD /* Pods-ParticleConnect_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ParticleConnect_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-ParticleConnect_Example/Pods-ParticleConnect_Example.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -215,10 +215,12 @@
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = A56D86G827;
 						LastSwiftMigration = 0900;
 					};
 					607FACE41AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = A56D86G827;
 						LastSwiftMigration = 0900;
 						TestTargetID = 607FACCF1AFB9204008FA782;
 					};
@@ -522,7 +524,9 @@
 			baseConfigurationReference = C7B75E73978A0DE27C8E1375 /* Pods-ParticleConnect_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = A56D86G827;
 				INFOPLIST_FILE = ParticleConnect/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
@@ -537,7 +541,9 @@
 			baseConfigurationReference = DFFA9E6C0161A72F468F80FD /* Pods-ParticleConnect_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = A56D86G827;
 				INFOPLIST_FILE = ParticleConnect/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
@@ -551,6 +557,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 56C8462B6D5B6E8747C69327 /* Pods-ParticleConnect_Tests.debug.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = A56D86G827;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -572,6 +579,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9E49772F16E7DE310FC226C9 /* Pods-ParticleConnect_Tests.release.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = A56D86G827;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
