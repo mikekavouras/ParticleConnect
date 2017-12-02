@@ -13,7 +13,11 @@ public class SelectNetworkViewController: UIViewController, UITableViewDataSourc
     let loaderView = LoaderView(frame: .zero)
     
     fileprivate var communicationManager: DeviceCommunicationManager? = DeviceCommunicationManager()
-    fileprivate var networks: [Network] = []
+    fileprivate var networks: [Network] = [] {
+        didSet {
+            self.tableView.reloadData()
+        }
+    }
     
     // MARK: - Life cycle
     
@@ -32,7 +36,6 @@ public class SelectNetworkViewController: UIViewController, UITableViewDataSourc
         
         scanForNetworks { foundNetworks in
             self.networks = foundNetworks
-            self.tableView.reloadData()
             self.loaderView.hide()
         }
     }
