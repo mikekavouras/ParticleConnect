@@ -8,64 +8,93 @@
 
 import UIKit
 
-class LoaderView: UIView {
+internal class LoaderView: UIView {
     let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
+    
     let textLabel: UILabel = {
         let label = UILabel(frame: .zero)
+        label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         label.textColor = .white
-        label.font = UIFont.systemFont(ofSize: 13, weight: .medium)
         label.textAlignment = .center
+        
         return label
     }()
     
+    let stackView: UIStackView = {
+        let sv = UIStackView()
+        sv.alignment = .fill
+        sv.axis = .vertical
+        sv.distribution = .fillEqually
+        sv.spacing = 8.0
+        
+        return sv
+    }()
+    
+    // MARK: - Life cycle
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
         backgroundColor = UIColor.black.withAlphaComponent(0.7)
         layer.cornerRadius = 8.0
         alpha = 0.0
         
-        addSubview(activityIndicator)
-        addSubview(textLabel)
-        
-        textLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        textLabel.textColor = .white
-        textLabel.textAlignment = .center
-        
-        let viewMargins = layoutMarginsGuide
-        
-        activityIndicator.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor).isActive = true
-        activityIndicator.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor).isActive = true
-        activityIndicator.topAnchor.constraint(equalTo: viewMargins.topAnchor, constant: 8).isActive = true
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        
-        let activityIndicatorMargins = activityIndicator.layoutMarginsGuide
-        
-        textLabel.topAnchor.constraint(equalTo: activityIndicatorMargins.bottomAnchor, constant: 16).isActive = true
-        textLabel.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor).isActive = true
-        textLabel.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor).isActive = true
-        textLabel.bottomAnchor.constraint(equalTo: viewMargins.bottomAnchor).isActive = true
-        textLabel.heightAnchor.constraint(equalToConstant: 30.0).isActive = true
-        textLabel.widthAnchor.constraint(equalToConstant: 160).isActive = true
-        textLabel.translatesAutoresizingMaskIntoConstraints = false
+        setup()
     }
-
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Setup
+    
+    private func setup() {
+        setupStackView()
+        setupActivityIndicator()
+        setupTextLabel()
+    }
+    
+    private func setupStackView() {
+        let viewMargins = layoutMarginsGuide
+        
+        addSubview(stackView)
+        stackView.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor).isActive = true
+        stackView.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor).isActive = true
+        stackView.topAnchor.constraint(equalTo: viewMargins.topAnchor, constant: 8).isActive = true
+        stackView.bottomAnchor.constraint(equalTo: viewMargins.bottomAnchor).isActive = true
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func setupActivityIndicator() {
+        stackView.addArrangedSubview(activityIndicator)
+    }
+    
+    private func setupTextLabel() {
+        stackView.addArrangedSubview(textLabel)
+        
+        let stackViewMargins = stackView.layoutMarginsGuide
+        
+        textLabel.leadingAnchor.constraint(equalTo: stackViewMargins.leadingAnchor).isActive = true
+        textLabel.trailingAnchor.constraint(equalTo: stackViewMargins.trailingAnchor).isActive = true
+        textLabel.widthAnchor.constraint(equalToConstant: 160).isActive = true
+        textLabel.translatesAutoresizingMaskIntoConstraints = false
     }
     
     func show(_ initialText: String) {
         textLabel.text = initialText
         activityIndicator.startAnimating()
-        UIViewPropertyAnimator(duration: 0.3, curve: .easeOut) {
+            
+        UIView.animate(withDuration: 0.3) {
             self.alpha = 1.0
-            }.startAnimation()
+        }
     }
     
     func hide() {
-        UIViewPropertyAnimator(duration: 0.3, curve: .easeOut) {
+        UIView.animate(withDuration: 0.3, animations: {
             self.alpha = 0.0
+        }) { _ in
             self.activityIndicator.stopAnimating()
-            }.startAnimation()
+        }
     }
     
     func setText(_ text: String) {
@@ -79,4 +108,3 @@ class LoaderView: UIView {
         }
     }
 }
-
