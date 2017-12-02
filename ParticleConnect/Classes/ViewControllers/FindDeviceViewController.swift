@@ -59,7 +59,6 @@ public class FindDeviceViewController: UIViewController {
         loaderView.translatesAutoresizingMaskIntoConstraints = false
     }
     
-    
     // MARK: Notification
     
     private func displayLocalNotification() {
@@ -109,6 +108,7 @@ public class FindDeviceViewController: UIViewController {
         communicationManager?.sendCommand(Command.Device.self) { [weak self] result in
             switch result {
             case .success(let value):
+                self?.communicationManager = nil
                 completion(value.deviceId)
             case .failure(let error):
                 print(error)
@@ -127,10 +127,12 @@ public class FindDeviceViewController: UIViewController {
     }
     
     private func getPublicKey(completion: @escaping () -> Void) {
+        print("get public key")
         communicationManager = DeviceCommunicationManager()
         communicationManager!.sendCommand(Command.PublicKey.self) { [weak self] result in
             switch result {
             case .success:
+                self?.communicationManager = nil
                 print("public key: \(result)")
                 completion()
             case .failure:

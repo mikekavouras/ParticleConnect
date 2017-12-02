@@ -16,7 +16,6 @@ public class DeviceCommunicationManager: DeviceConnectionDelegate {
     var completionCommand: ((ResultType<[AnyHashable: Any], ConnectionError>) -> Void)?
 
     public func sendCommand<T: ParticleCommunicable>(_ type: T.Type, completion: @escaping (ResultType<T.ResponseType, ConnectionError>) -> Void) {
-    
         runCommand(onConnection: { connection in
             connection.writeString(T.command)
         }, onCompletion: { result in
@@ -31,6 +30,35 @@ public class DeviceCommunicationManager: DeviceConnectionDelegate {
         })
     }
     
+    public func configureAP(network: Network, completion: @escaping (ResultType<[AnyHashable: Any], ConnectionError>) -> Void) {
+        runCommand(onConnection: { connection in
+            guard let json = network.asJSON,
+                let data = try? JSONSerialization.data(withJSONObject: json, options: JSONSerialization.WritingOptions.prettyPrinted),
+                let jsonString = String(data: data, encoding: String.Encoding.utf8) else
+            {
+                completion(.failure(ConnectionError.couldNotConnect))
+                return
+            }
+            let command = String(format: "configure-ap\n%ld\n\n%@", jsonString.count, jsonString)
+            connection.writeString(command)
+        }, onCompletion: completion)
+    }
+    
+    public func connectAP(completion: @escaping (ResultType<[AnyHashable: Any], ConnectionError>) -> Void) {
+        runCommand(onConnection: { connection in
+            let request: [AnyHashable: Any] = ["idx":0]
+            guard let json = try? JSONSerialization.data(withJSONObject: request, options: .prettyPrinted),
+                let jsonString = String(data: json, encoding: String.Encoding.utf8) else
+            {
+                completion(.failure(ConnectionError.couldNotConnect))
+                return
+            }
+            
+            let command = String(format: "connect-ap\n%ld\n\n%@", jsonString.count, jsonString)
+            connection.writeString(command)
+        }, onCompletion: completion)
+    }
+
     private func runCommand(onConnection: @escaping (DeviceConnection) -> Void,
                             onCompletion: @escaping (ResultType<[AnyHashable: Any], ConnectionError>) -> Void) {
         

@@ -88,12 +88,24 @@ internal class LoaderView: UIView {
         }
     }
     
-    func hide() {
-        UIView.animate(withDuration: 0.3, animations: {
-            self.alpha = 0.0
-        }) { _ in
-            self.activityIndicator.stopAnimating()
+    func hide(_ optionalMessage: String? = nil) {
+        let fadeOut = {
+            UIView.animate(withDuration: 0.3, animations: {
+                self.alpha = 0.0
+            }) { _ in
+                self.activityIndicator.stopAnimating()
+            }
         }
+        
+        if let message = optionalMessage {
+            setText(message)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                fadeOut()
+            }
+        } else {
+            fadeOut()
+        }
+
     }
     
     func setText(_ text: String) {

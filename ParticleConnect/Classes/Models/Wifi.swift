@@ -21,6 +21,7 @@ public class Wifi {
     
     public func stopMonitoringConnectionInForeground() {
         foregroundTimer?.invalidate()
+        foregroundTimer = nil
     }
     
     public func stopMonitoringConnection() {
@@ -74,6 +75,7 @@ public class Wifi {
     
     private func stopMonitoringConnectionInBackground() {
         backgroundTimer?.invalidate()
+        backgroundTimer = nil
     }
     
     @objc private func checkDeviceConnectionForNotification(timer: Timer) {

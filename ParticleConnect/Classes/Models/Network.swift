@@ -5,7 +5,7 @@
 //  Created by Mike on 12/1/17.
 //
 
-func ==(lhs: Network, rhs: Network) -> Bool {
+public func ==(lhs: Network, rhs: Network) -> Bool {
     return lhs.ssid == rhs.ssid
 }
 
@@ -58,7 +58,7 @@ enum SecurityType: UInt {
     }
 }
 
-struct Network: Equatable, Hashable {
+public struct Network: Equatable, Hashable {
     
     static let SignalStrengthThresholdStrong = -56
     static let SignalStrengthThresholdWeak = -71
@@ -119,7 +119,7 @@ struct Network: Equatable, Hashable {
     
     // MARK: - Hashable
     
-    var hashValue: Int {
+    public var hashValue: Int {
         return Int(sec)
     }
 }

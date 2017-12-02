@@ -7,12 +7,17 @@
 
 import UIKit
 
-public class SelectNetworkViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+public class SelectNetworkViewController: UIViewController,
+    UITableViewDataSource,
+    UITableViewDelegate,
+    NetworkCredentialsTransferManagerDelegate {
     
     let tableView = UITableView(frame: .zero, style: .plain)
     let loaderView = LoaderView(frame: .zero)
     
+    fileprivate var transferManager: NetworkCredentialsTransferManager?
     fileprivate var communicationManager: DeviceCommunicationManager? = DeviceCommunicationManager()
+    
     fileprivate var networks: [Network] = [] {
         didSet {
             self.tableView.reloadData()
@@ -40,7 +45,7 @@ public class SelectNetworkViewController: UIViewController, UITableViewDataSourc
         }
     }
     
-    // MARK: Setup
+    // MARK: - Setup
     
     private func setup() {
         setupTableView()
@@ -75,7 +80,8 @@ public class SelectNetworkViewController: UIViewController, UITableViewDataSourc
     }
 
     private func scanForNetworks(completion: @escaping ([Network]) -> Void) {
-        // TODO: Retry logic
+        
+        // TODO: Retry logic (auto or manual)
     
         communicationManager?.sendCommand(Command.ScanAP.self) { result in
             switch result {
@@ -86,6 +92,40 @@ public class SelectNetworkViewController: UIViewController, UITableViewDataSourc
             }
             self.communicationManager = nil
         }
+    }
+    
+    fileprivate func displayPasswordDialog(`for` network: Network) {
+        let alertController = UIAlertController(title: "Enter Password", message: "Enter the password for \(network.ssid)", preferredStyle: .alert)
+        let passwordTextField = { (textField: UITextField) -> Void in
+            textField.placeholder = "Password"
+            textField.isSecureTextEntry = true
+        }
+        alertController.addTextField(configurationHandler: passwordTextField)
+        
+        let submitAction = UIAlertAction(title: "Join", style: .default) { _ in
+            if let textFields = alertController.textFields,
+                let passwordField = textFields.first,
+                let password = passwordField.text
+            {
+                var mutableNetwork = network
+                mutableNetwork.password = password
+                
+                self.transferCredentials(for: network)
+            }
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
+
+        alertController.addAction(cancelAction)
+        alertController.addAction(submitAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    private func transferCredentials(`for` network: Network) {
+        loaderView.show("Transferring credentials")
+        
+        transferManager = NetworkCredentialsTransferManager()
+        transferManager?.delegate = self
+        transferManager?.transferCredentials(for: network)
     }
 }
 
@@ -114,6 +154,43 @@ extension SelectNetworkViewController {
         let network = networks[indexPath.row]
         print(network.ssid)
         
+        if network.securityType != .open {
+            displayPasswordDialog(for: network)
+        } else {
+            transferCredentials(for: network)
+        }
+        
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+// MARK: - NetworkCredentialsTransferManagerDelegate
+
+extension SelectNetworkViewController {
+    func networkCredentialsTransferManagerDidConfigureDeviceNetworkCredentials(_ manager: NetworkCredentialsTransferManager) {
+        print("finished configuration")
+    }
+    
+    func networkCredentialsTransferManagerDidConnectDeviceToNetwork(_ manager: NetworkCredentialsTransferManager) {
+        transferManager = nil
+        loaderView.setText("Connecting to network")
+        
+        // run check to see if we're still connected to the particle wifi for up to 20 seconds
+        var retries = 0
+        func connect() {
+            if Wifi.isDeviceConnected(.photon) == true && retries < 10 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    retries += 1
+                    connect()
+                }
+            } else {
+                loaderView.hide("Connected!")
+                
+                // make sure the phone is back on a network
+                // make sure the photon is actually connected to the internet
+            }
+        }
+        
+        connect()
     }
 }
