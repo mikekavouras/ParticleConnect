@@ -58,7 +58,7 @@ public class SelectNetworkViewController: UIViewController, UITableViewDataSourc
         tableView.topAnchor.constraint(equalTo: margins.topAnchor).isActive = true
         tableView.bottomAnchor.constraint(equalTo: margins.bottomAnchor).isActive = true
         
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        tableView.register(NetworkCell.self, forCellReuseIdentifier: "Cell")
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -101,8 +101,8 @@ extension SelectNetworkViewController {
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        cell.textLabel?.text = networks[indexPath.row].ssid
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! NetworkCell
+        cell.network = networks[indexPath.row]
         return cell
     }
 }

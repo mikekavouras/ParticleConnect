@@ -9,18 +9,49 @@ func ==(lhs: Network, rhs: Network) -> Bool {
     return lhs.ssid == rhs.ssid
 }
 
+enum SignalStrength {
+    case weak
+    case medium
+    case strong
+    
+    var asset: UIImage {
+        switch self {
+        case .weak:
+            return UIImage.particleAsset(named: "wifi_weak")
+        case .medium:
+            return UIImage.particleAsset(named: "wifi_medium")
+        case .strong:
+            return UIImage.particleAsset(named: "wifi_strong")
+        }
+    }
+}
+
 struct Network: Equatable, Hashable {
+    
+    static let SignalStrengthThresholdStrong = -56
+    static let SignalStrengthThresholdWeak = -71
+    
     let sec: UInt
     let mdr: UInt
     let ssid: String
     let rssi: Int
     let ch: Int
     
-    var password: String = ""
-    
-    var hashValue: Int {
-        return Int(sec)
+    var isLocked: Bool {
+        return sec > 0
     }
+
+    var signalStrength: SignalStrength {
+        if rssi > Network.SignalStrengthThresholdStrong {
+            return .strong
+        }
+        if rssi > Network.SignalStrengthThresholdWeak {
+            return .medium
+        }
+        return .weak
+    }
+    
+    var password: String = ""
     
     init(json: [AnyHashable: Any]) {
         sec =  (json["sec"] as? UInt) ?? 0
@@ -48,5 +79,11 @@ struct Network: Equatable, Hashable {
         ]
         
         return request
+    }
+    
+    // MARK: - Hashable
+    
+    var hashValue: Int {
+        return Int(sec)
     }
 }

@@ -32,9 +32,9 @@ A simple framework to connect Particle hardware to the greater Internet
 
   s.source_files = 'ParticleConnect/Classes/**/*'
 
-  # s.resource_bundles = {
-  #   'ParticleConnect' => ['ParticleConnect/Assets/*.png']
-  # }
+  s.resource_bundles = {
+    'ParticleConnect' => ['ParticleConnect/Assets/*.png']
+  }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'

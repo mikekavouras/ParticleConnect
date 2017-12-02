@@ -25,7 +25,6 @@ internal class LoaderView: UIView {
         sv.alignment = .fill
         sv.axis = .vertical
         sv.distribution = .fillEqually
-        sv.spacing = 8.0
         
         return sv
     }()
