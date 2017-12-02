@@ -5,7 +5,11 @@
 //  Created by Mike on 12/1/17.
 //
 
-struct Network {
+func ==(lhs: Network, rhs: Network) -> Bool {
+    return lhs.ssid == rhs.ssid
+}
+
+struct Network: Equatable, Hashable {
     let sec: UInt
     let mdr: UInt
     let ssid: String
@@ -13,6 +17,10 @@ struct Network {
     let ch: Int
     
     var password: String = ""
+    
+    var hashValue: Int {
+        return Int(sec)
+    }
     
     init(json: [AnyHashable: Any]) {
         sec =  (json["sec"] as? UInt) ?? 0
