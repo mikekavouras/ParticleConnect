@@ -15,7 +15,7 @@ class NetworkCell: UITableViewCell {
             
             textLabel?.text = network.ssid
             lockImageView.isHidden = !network.isLocked
-            signalImageView.image = network.signalStrength.asset
+            signalImageView .image = network.signalStrength.asset
         }
     }
     
