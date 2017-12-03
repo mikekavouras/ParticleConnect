@@ -30,6 +30,27 @@ public class Wifi {
         NotificationCenter.default.removeObserver(self)
     }
     
+    /*
+     Public: Kicks off a timer to run in the foreground. Every
+     iteration checks to see if our phone is connected to the
+     photon's onboard wifi
+     
+     Returns nil
+     */
+    @objc public func startMonitoringConnectionInForeground() {
+        stopMonitoringConnectionInBackground()
+        stopMonitoringConnectionInForeground()
+        
+        foregroundTimer = Timer(timeInterval: Wifi.foregroundTimerInterval, target: self, selector: #selector(checkDeviceWifiConnection(timer:)), userInfo: nil, repeats: true)
+        
+        RunLoop.current.add(foregroundTimer!, forMode: .commonModes)
+        
+        // kill the background task when we're in the foreground
+        if let identifier = backgroundTaskIdentifier {
+            UIApplication.shared.endBackgroundTask(identifier)
+        }
+    }
+    
     // MARK: - Private
     
     static let foregroundTimerInterval = 1.0
@@ -41,21 +62,17 @@ public class Wifi {
     
     private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier? = nil
     
-    @objc public func startMonitoringConnectionInForeground() {
-        stopMonitoringConnectionInBackground()
-        
-        foregroundTimer?.invalidate()
-        foregroundTimer = nil
-        foregroundTimer = Timer(timeInterval: Wifi.foregroundTimerInterval, target: self, selector: #selector(checkDeviceWifiConnection(timer:)), userInfo: nil, repeats: true)
-        
-        RunLoop.current.add(foregroundTimer!, forMode: .commonModes)
-        
-        // kill the background task when we're in the foreground
-        if let identifier = backgroundTaskIdentifier {
-            UIApplication.shared.endBackgroundTask(identifier)
-        }
-    }
-    
+    /*
+     Private: Kicks off a timer to run in the background. Every
+     iteration checks to see if our phone is connected to the
+     photon's onboard wifi.
+     
+     ** Important **
+     This method creates a background task, causing the app
+     to continue running even when the app is not in the foreground
+     
+     Returns nil
+     */
     @objc private func startMonitoringConnectionInBackground() {
         stopMonitoringConnectionInForeground()
         
@@ -77,7 +94,7 @@ public class Wifi {
         backgroundTimer?.invalidate()
         backgroundTimer = nil
     }
-    
+ 
     @objc private func checkDeviceConnectionForNotification(timer: Timer) {
         print("checking connection in the background")
         

@@ -17,6 +17,10 @@ public class SelectNetworkViewController: UIViewController,
     
     fileprivate var transferManager: NetworkCredentialsTransferManager?
     fileprivate var communicationManager: DeviceCommunicationManager? = DeviceCommunicationManager()
+    let reachability = Reachability()!
+    
+    var isHostReachable = false
+    
     
     fileprivate var networks: [Network] = [] {
         didSet {
@@ -45,11 +49,16 @@ public class SelectNetworkViewController: UIViewController,
         }
     }
     
+    deinit {
+        reachability.stopNotifier()
+    }
+    
     // MARK: - Setup
     
     private func setup() {
         setupTableView()
         setupLoaderView()
+        setupReachability()
     }
     
     private func setupTableView() {
@@ -77,6 +86,21 @@ public class SelectNetworkViewController: UIViewController,
         loaderView.translatesAutoresizingMaskIntoConstraints = false
         loaderView.centerXAnchor.constraint(equalTo: margins.centerXAnchor).isActive = true
         loaderView.centerYAnchor.constraint(equalTo: margins.centerYAnchor, constant: -50.0).isActive = true
+    }
+    
+    private func setupReachability() {
+        reachability.whenReachable = { reachability in
+            self.isHostReachable = true
+        }
+        reachability.whenUnreachable = { _ in
+            self.isHostReachable = false
+        }
+        
+        do {
+            try reachability.startNotifier()
+        } catch {
+            print("Unable to start notifier")
+        }
     }
 
     private func scanForNetworks(completion: @escaping ([Network]) -> Void) {
@@ -172,7 +196,7 @@ extension SelectNetworkViewController {
     }
     
     func networkCredentialsTransferManagerDidConnectDeviceToNetwork(_ manager: NetworkCredentialsTransferManager) {
-        transferManager = nil
+        transferManager = nil // we're done using this
         loaderView.setText("Connecting to network")
         
         // run check to see if we're still connected to the particle wifi for up to 20 seconds
@@ -184,10 +208,29 @@ extension SelectNetworkViewController {
                     connect()
                 }
             } else {
-                loaderView.hide("Connected!")
-                
-                // make sure the phone is back on a network
-                // make sure the photon is actually connected to the internet
+                if Wifi.isDeviceConnected(.photon) {
+                    puts("why are we still connected to the device?")
+                } else {
+                    loaderView.hide("Connected!")
+                    
+                    var reachabilityRetries = 0
+                    func checkHostReachability() {
+                        if !isHostReachable && reachabilityRetries < 20 {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                reachabilityRetries += 1
+                                checkHostReachability()
+                            }
+                        } else {
+                            if !isHostReachable {
+                                print("why aren't we connected :(")
+                            } else {
+                                print("we got this!")
+                            }
+                        }
+                    }
+                    checkHostReachability()
+                    // make sure the photon is actually connected to the internet
+                }
             }
         }
         
