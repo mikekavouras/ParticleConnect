@@ -134,7 +134,7 @@ public class SelectNetworkViewController: UIViewController,
                 var mutableNetwork = network
                 mutableNetwork.password = password
                 
-                self.transferCredentials(for: network)
+                self.transferCredentials(for: mutableNetwork)
             }
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
