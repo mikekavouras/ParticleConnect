@@ -10,6 +10,10 @@ protocol NetworkCredentialsTransferManagerDelegate: class {
     func networkCredentialsTransferManagerDidConnectDeviceToNetwork(_ manager: NetworkCredentialsTransferManager)
 }
 
+extension NetworkCredentialsTransferManagerDelegate where Self: UIViewController {
+    func networkCredentialsTransferManagerDidConfigureDeviceNetworkCredentials(_ manager: NetworkCredentialsTransferManager) {}
+}
+
 class NetworkCredentialsTransferManager {
     
     var network: Network!

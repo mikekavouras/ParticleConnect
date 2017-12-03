@@ -141,7 +141,6 @@ public class FindDeviceViewController: UIViewController {
         }
     }
     
-    
     // MARK: -
     
     private func showFailureAlert(_ message: String) {

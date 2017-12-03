@@ -12,16 +12,19 @@ public class SelectNetworkViewController: UIViewController,
     UITableViewDelegate,
     NetworkCredentialsTransferManagerDelegate {
     
-    let tableView = UITableView(frame: .zero, style: .plain)
-    let loaderView = LoaderView(frame: .zero)
+    // UI
+    private let tableView = UITableView(frame: .zero, style: .plain)
+    private let loaderView = LoaderView(frame: .zero)
     
+    // Communication
     fileprivate var transferManager: NetworkCredentialsTransferManager?
     fileprivate var communicationManager: DeviceCommunicationManager? = DeviceCommunicationManager()
-    let reachability = Reachability()!
     
-    var isHostReachable = false
+    // Network
+    private let reachability = Reachability()!
+    private var isHostReachable = false
     
-    
+    // Internal data
     fileprivate var networks: [Network] = [] {
         didSet {
             self.tableView.reloadData()
@@ -32,8 +35,6 @@ public class SelectNetworkViewController: UIViewController,
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = .white
         
         setup()
     }
@@ -49,6 +50,12 @@ public class SelectNetworkViewController: UIViewController,
         }
     }
     
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        reachability.stopNotifier()
+    }
+    
     deinit {
         reachability.stopNotifier()
     }
@@ -56,6 +63,8 @@ public class SelectNetworkViewController: UIViewController,
     // MARK: - Setup
     
     private func setup() {
+        view.backgroundColor = .white
+
         setupTableView()
         setupLoaderView()
         setupReachability()
@@ -89,7 +98,7 @@ public class SelectNetworkViewController: UIViewController,
     }
     
     private func setupReachability() {
-        reachability.whenReachable = { reachability in
+        reachability.whenReachable = { _ in
             self.isHostReachable = true
         }
         reachability.whenUnreachable = { _ in
@@ -116,32 +125,6 @@ public class SelectNetworkViewController: UIViewController,
             }
             self.communicationManager = nil
         }
-    }
-    
-    fileprivate func displayPasswordDialog(`for` network: Network) {
-        let alertController = UIAlertController(title: "Enter Password", message: "Enter the password for \(network.ssid)", preferredStyle: .alert)
-        let passwordTextField = { (textField: UITextField) -> Void in
-            textField.placeholder = "Password"
-            textField.isSecureTextEntry = true
-        }
-        alertController.addTextField(configurationHandler: passwordTextField)
-        
-        let submitAction = UIAlertAction(title: "Join", style: .default) { _ in
-            if let textFields = alertController.textFields,
-                let passwordField = textFields.first,
-                let password = passwordField.text
-            {
-                var mutableNetwork = network
-                mutableNetwork.password = password
-                
-                self.transferCredentials(for: mutableNetwork)
-            }
-        }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
-
-        alertController.addAction(cancelAction)
-        alertController.addAction(submitAction)
-        present(alertController, animated: true, completion: nil)
     }
     
     private func transferCredentials(`for` network: Network) {
@@ -176,10 +159,19 @@ extension SelectNetworkViewController {
 extension SelectNetworkViewController {
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let network = networks[indexPath.row]
-        print(network.ssid)
         
         if network.securityType != .open {
-            displayPasswordDialog(for: network)
+            UI.presentPasswordDialog(for: network, in: self) { alertController in
+                if let textFields = alertController.textFields,
+                    let passwordField = textFields.first,
+                    let password = passwordField.text
+                {
+                    var mutableNetwork = network
+                    mutableNetwork.password = password
+                    
+                    self.transferCredentials(for: mutableNetwork)
+                }
+            }
         } else {
             transferCredentials(for: network)
         }
@@ -191,49 +183,32 @@ extension SelectNetworkViewController {
 // MARK: - NetworkCredentialsTransferManagerDelegate
 
 extension SelectNetworkViewController {
-    func networkCredentialsTransferManagerDidConfigureDeviceNetworkCredentials(_ manager: NetworkCredentialsTransferManager) {
-        print("finished configuration")
+    private func monitorForNetworkReachability() {
+        var retries = 0
+        func checkHostReachability() {
+            if !isHostReachable && retries < 20 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    retries += 1
+                    checkHostReachability()
+                }
+            } else {
+                if !isHostReachable {
+                    print("why aren't we connected :(")
+                } else {
+                    print("we got this!")
+                }
+            }
+        }
+        checkHostReachability()
     }
     
     func networkCredentialsTransferManagerDidConnectDeviceToNetwork(_ manager: NetworkCredentialsTransferManager) {
         transferManager = nil // we're done using this
         loaderView.setText("Connecting to network")
         
-        // run check to see if we're still connected to the particle wifi for up to 20 seconds
-        var retries = 0
-        func connect() {
-            if Wifi.isDeviceConnected(.photon) == true && retries < 10 {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    retries += 1
-                    connect()
-                }
-            } else {
-                if Wifi.isDeviceConnected(.photon) {
-                    puts("why are we still connected to the device?")
-                } else {
-                    loaderView.hide("Connected!")
-                    
-                    var reachabilityRetries = 0
-                    func checkHostReachability() {
-                        if !isHostReachable && reachabilityRetries < 20 {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                reachabilityRetries += 1
-                                checkHostReachability()
-                            }
-                        } else {
-                            if !isHostReachable {
-                                print("why aren't we connected :(")
-                            } else {
-                                print("we got this!")
-                            }
-                        }
-                    }
-                    checkHostReachability()
-                    // make sure the photon is actually connected to the internet
-                }
-            }
+        Wifi.monitorForDisconnectingNetwork {
+            self.loaderView.hide("Connected!")
+            self.monitorForNetworkReachability()
         }
-        
-        connect()
     }
 }

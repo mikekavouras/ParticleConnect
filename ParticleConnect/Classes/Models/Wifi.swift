@@ -30,6 +30,25 @@ public class Wifi {
         NotificationCenter.default.removeObserver(self)
     }
     
+    public static func monitorForDisconnectingNetwork(completion: @escaping () -> Void) {
+        var retries = 0
+        func connect() {
+            if Wifi.isDeviceConnected(.photon) == true && retries < 10 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    retries += 1
+                    connect()
+                }
+            } else {
+                if Wifi.isDeviceConnected(.photon) {
+                    print("why are we still connected to the device?")
+                } else {
+                    completion()
+                }
+            }
+        }
+        connect()
+    }
+    
     /*
      Public: Kicks off a timer to run in the foreground. Every
      iteration checks to see if our phone is connected to the
