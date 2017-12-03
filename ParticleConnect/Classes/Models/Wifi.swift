@@ -9,12 +9,17 @@ import Foundation
 import UIKit
 import SystemConfiguration.CaptiveNetwork
 
+extension Notification.Name {
+    public static let ConnectedToParticleDevice = Notification.Name("ConnectedToParticleDevice")
+}
+
 public class Wifi {
     
     // MARK: - Public
     
-    public init(_ connectionBlock: @escaping (UIApplicationState) -> Void) {
-        self.onConnectionHandler = connectionBlock
+    static let shared = Wifi()
+    
+    public init() {
         NotificationCenter.default.addObserver(self, selector: #selector(startMonitoringConnectionInForeground), name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(startMonitoringConnectionInBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
     }
@@ -75,7 +80,6 @@ public class Wifi {
     static let foregroundTimerInterval = 1.0
     static let backgroundTimerInterval = 1.0
     
-    private let onConnectionHandler: (UIApplicationState) -> Void
     private var foregroundTimer: Timer?
     private var backgroundTimer: Timer?
     
@@ -123,7 +127,7 @@ public class Wifi {
         
         stopMonitoringConnectionInBackground()
         
-        onConnectionHandler(state)
+        NotificationCenter.default.post(name: Notification.Name.ConnectedToParticleDevice, object: state)
     }
     
     @objc private func checkDeviceWifiConnection(timer: Timer) {
@@ -133,7 +137,7 @@ public class Wifi {
         guard state == .active,
             Wifi.isDeviceConnected(.photon) else { return }
         
-        onConnectionHandler(state)
+        NotificationCenter.default.post(name: Notification.Name.ConnectedToParticleDevice, object: state)
     }
     
     

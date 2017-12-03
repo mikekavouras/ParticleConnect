@@ -12,12 +12,6 @@ public class FindDeviceViewController: UIViewController {
     
     let loaderView = LoaderView(frame: .zero)
     
-    fileprivate lazy var wifi: Wifi = {
-        return Wifi { [weak self] state in
-            self?.onConnectionHandler(state: state)
-        }
-    }()
-    
     fileprivate var communicationManager: DeviceCommunicationManager?
     private var retryCount = 0
     
@@ -27,25 +21,28 @@ public class FindDeviceViewController: UIViewController {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { allowed, error in }
         UIApplication.shared.registerForRemoteNotifications()
         
+        NotificationCenter.default.addObserver(self, selector: #selector(onConnectionHandler(notification:)), name: Notification.Name.ConnectedToParticleDevice, object: nil)
+        
         setup()
     }
     
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        wifi.startMonitoringConnectionInForeground()
+        
+        Wifi.shared.startMonitoringConnectionInForeground()
         
         loaderView.show("Searching for device")
     }
     
     override public func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        wifi.stopMonitoringConnectionInForeground()
+        Wifi.shared.stopMonitoringConnectionInForeground()
         
         loaderView.hide()
     }
     
     deinit {
-        wifi.stopMonitoringConnection()
+        Wifi.shared.stopMonitoringConnection()
     }
     
     // MARK: Setup
@@ -76,13 +73,14 @@ public class FindDeviceViewController: UIViewController {
     
     // MARK: Navigation
     
-    func onConnectionHandler(state: UIApplicationState) {
-        print("Connected to device: \(state)")
+    @objc private func onConnectionHandler(notification: Notification) {
+        guard let state = notification.object as? UIApplicationState else { return }
+        
         if state == .background || state == .inactive {
             displayLocalNotification()
         }
         if state == .active {
-            wifi.stopMonitoringConnection()
+            Wifi.shared.stopMonitoringConnection()
             print("connected in the foreground")
             
             loaderView.setText("Getting device ID")
