@@ -20,10 +20,6 @@ public class SelectNetworkViewController: UIViewController,
     fileprivate var transferManager: NetworkCredentialsTransferManager?
     fileprivate var communicationManager: DeviceCommunicationManager? = DeviceCommunicationManager()
     
-    // Network
-    private let reachability = Reachability()!
-    private var isHostReachable = false
-    
     // Internal data
     fileprivate var networks: [Network] = [] {
         didSet {
@@ -50,16 +46,6 @@ public class SelectNetworkViewController: UIViewController,
         }
     }
     
-    public override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        reachability.stopNotifier()
-    }
-    
-    deinit {
-        reachability.stopNotifier()
-    }
-    
     // MARK: - Setup
     
     private func setup() {
@@ -67,7 +53,6 @@ public class SelectNetworkViewController: UIViewController,
 
         setupTableView()
         setupLoaderView()
-        setupReachability()
     }
     
     private func setupTableView() {
@@ -97,21 +82,6 @@ public class SelectNetworkViewController: UIViewController,
         loaderView.centerYAnchor.constraint(equalTo: margins.centerYAnchor, constant: -50.0).isActive = true
     }
     
-    private func setupReachability() {
-        reachability.whenReachable = { _ in
-            self.isHostReachable = true
-        }
-        reachability.whenUnreachable = { _ in
-            self.isHostReachable = false
-        }
-        
-        do {
-            try reachability.startNotifier()
-        } catch {
-            print("Unable to start notifier")
-        }
-    }
-
     private func scanForNetworks(completion: @escaping ([Network]) -> Void) {
         
         // TODO: Retry logic (auto or manual)
@@ -183,32 +153,15 @@ extension SelectNetworkViewController {
 // MARK: - NetworkCredentialsTransferManagerDelegate
 
 extension SelectNetworkViewController {
-    private func monitorForNetworkReachability() {
-        var retries = 0
-        func checkHostReachability() {
-            if !isHostReachable && retries < 20 {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    retries += 1
-                    checkHostReachability()
-                }
-            } else {
-                if !isHostReachable {
-                    print("why aren't we connected :(")
-                } else {
-                    print("we got this!")
-                }
-            }
-        }
-        checkHostReachability()
-    }
-    
     func networkCredentialsTransferManagerDidConnectDeviceToNetwork(_ manager: NetworkCredentialsTransferManager) {
         transferManager = nil // we're done using this
         loaderView.setText("Connecting to network")
         
-        Wifi.monitorForDisconnectingNetwork {
+        Wifi.shared.monitorForDisconnectingNetwork {
             self.loaderView.hide("Connected!")
-            self.monitorForNetworkReachability()
+            Wifi.shared.monitorForNetworkReachability {
+                print("we got this!")
+            }
         }
     }
 }

@@ -25,4 +25,13 @@ class UI {
         alertController.addAction(submitAction)
         viewController.present(alertController, animated: true, completion: nil)
     }
+    
+    static func presentBasicAlert(`in` viewController: UIViewController, message: String) {
+        let action = UIAlertAction(title: "Damn", style: .default)
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+            
+        alert.addAction(action)
+        
+        viewController.present(alert, animated: true, completion: nil)
+    }
 }

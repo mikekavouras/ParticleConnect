@@ -10,16 +10,9 @@ import UserNotifications
 
 public class FindDeviceViewController: UIViewController {
     
-    let loaderView = LoaderView(frame: .zero)
-    
-    fileprivate lazy var wifi: Wifi = {
-        return Wifi { [weak self] state in
-            self?.onConnectionHandler(state: state)
-        }
-    }()
+    let loaderView: LoadingRepresentable & UIView = LoaderView(frame: .zero)
     
     fileprivate var communicationManager: DeviceCommunicationManager?
-    private var retryCount = 0
     
     // MARK: Life cycle
     
@@ -27,25 +20,28 @@ public class FindDeviceViewController: UIViewController {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { allowed, error in }
         UIApplication.shared.registerForRemoteNotifications()
         
+        NotificationCenter.default.addObserver(self, selector: #selector(onConnectionHandler(notification:)), name: Notification.Name.ConnectedToParticleDevice, object: nil)
+        
         setup()
     }
     
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        wifi.startMonitoringConnectionInForeground()
+        
+        Wifi.shared.startMonitoringConnectionInForeground()
         
         loaderView.show("Searching for device")
     }
     
     override public func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        wifi.stopMonitoringConnectionInForeground()
+        Wifi.shared.stopMonitoringConnectionInForeground()
         
         loaderView.hide()
     }
     
     deinit {
-        wifi.stopMonitoringConnection()
+        Wifi.shared.stopMonitoringConnection()
     }
     
     // MARK: Setup
@@ -73,16 +69,16 @@ public class FindDeviceViewController: UIViewController {
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
     }
     
-    
     // MARK: Navigation
     
-    func onConnectionHandler(state: UIApplicationState) {
-        print("Connected to device: \(state)")
+    @objc private func onConnectionHandler(notification: Notification) {
+        guard let state = notification.object as? UIApplicationState else { return }
+        
         if state == .background || state == .inactive {
             displayLocalNotification()
         }
         if state == .active {
-            wifi.stopMonitoringConnection()
+            Wifi.shared.stopMonitoringConnection()
             print("connected in the foreground")
             
             loaderView.setText("Getting device ID")
@@ -103,6 +99,7 @@ public class FindDeviceViewController: UIViewController {
         }
     }
     
+    private var retry = false
     private func getDeviceId(completion: @escaping (String) -> Void) {
         communicationManager = DeviceCommunicationManager()
         communicationManager?.sendCommand(Command.Device.self) { [weak self] result in
@@ -111,16 +108,18 @@ public class FindDeviceViewController: UIViewController {
                 self?.communicationManager = nil
                 completion(value.deviceId)
             case .failure(let error):
-                print(error)
+                self?.communicationManager = nil
                 if error == ConnectionError.timeout {
-                    if self != nil && self!.retryCount < 2 {
-                        self?.retryCount += 1
+                    if self != nil && !self!.retry {
+                        self?.retry = true
                         self?.fetchDeviceId()
                     } else {
-                        self?.showFailureAlert("Could not get the device ID (timeout)")
+                        guard let viewController = self else { return }
+                        UI.presentBasicAlert(in: viewController, message: "Could not get the device ID (timeout)")
                     }
                 } else {
-                    self?.showFailureAlert("Could not get the device ID")
+                    guard let viewController = self else { return }
+                    UI.presentBasicAlert(in: viewController, message: "Could not get the device ID")
                 }
             }
         }
@@ -136,21 +135,10 @@ public class FindDeviceViewController: UIViewController {
                 print("public key: \(result)")
                 completion()
             case .failure:
-                self?.showFailureAlert("Could not get the public key")
+                self?.communicationManager = nil
+                guard let viewController = self else { return }
+                UI.presentBasicAlert(in: viewController, message: "Could not get the public key")
             }
         }
     }
-    
-    // MARK: -
-    
-    private func showFailureAlert(_ message: String) {
-        let action = UIAlertAction(title: "Damn", style: .default)
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        
-        alert.addAction(action)
-        
-        present(alert, animated: true, completion: nil)
-    }
 }
-
-
