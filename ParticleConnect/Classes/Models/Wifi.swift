@@ -38,6 +38,7 @@ public class Wifi {
     public func stopMonitoringConnection() {
         stopMonitoringConnectionInForeground()
         stopMonitoringConnectionInBackground()
+        
         NotificationCenter.default.removeObserver(self)
     }
     

@@ -160,7 +160,7 @@ extension SelectNetworkViewController {
         Wifi.shared.monitorForDisconnectingNetwork {
             self.loaderView.hide("Connected!")
             Wifi.shared.monitorForNetworkReachability {
-                print("we got this!")
+                NotificationCenter.default.post(name: Notification.Name.ParticleConnectNewDeviceConnectedSuccess, object: nil)
             }
         }
     }
