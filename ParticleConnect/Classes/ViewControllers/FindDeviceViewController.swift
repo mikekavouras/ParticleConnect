@@ -50,6 +50,8 @@ internal class FindDeviceViewController: UIViewController {
     private func setup() {
         view.backgroundColor = .white
         
+        WiFi.shared = WiFi()
+        
         setupLoaderView()
         registerForLocalNotifications()
     }

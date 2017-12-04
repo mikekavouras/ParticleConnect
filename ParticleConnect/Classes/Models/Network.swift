@@ -61,7 +61,7 @@ enum SecurityType: UInt {
 public struct Network: Equatable, Hashable {
     
     static let SignalStrengthThresholdStrong = -56
-    static let SignalStrengthThresholdWeak = -71
+    static let SignalStrengthThresholdWeak = -80
     
     let sec: UInt
     let mdr: UInt

@@ -12,6 +12,7 @@ public extension Notification.Name {
 }
 
 public class ParticleConnectViewController: UIViewController {
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
         
@@ -19,23 +20,18 @@ public class ParticleConnectViewController: UIViewController {
     }
     
     private func setup() {
-        setupNavigationController()
-    }
-    
-    private func setupNavigationController() {
         let findDeviceViewController = FindDeviceViewController()
-        let navigationController = UINavigationController(rootViewController: findDeviceViewController)
         
-        addChildViewController(navigationController)
-        view.addSubview(navigationController.view)
+        addChildViewController(findDeviceViewController)
+        view.addSubview(findDeviceViewController.view)
         
         // auto layout
         let margins = view.layoutMarginsGuide
-        navigationController.view.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
-        navigationController.view.trailingAnchor.constraint(equalTo: margins.trailingAnchor).isActive = true
-        navigationController.view.topAnchor.constraint(equalTo: margins.topAnchor).isActive = true
-        navigationController.view.bottomAnchor.constraint(equalTo: margins.bottomAnchor).isActive = true
+        findDeviceViewController.view.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
+        findDeviceViewController.view.trailingAnchor.constraint(equalTo: margins.trailingAnchor).isActive = true
+        findDeviceViewController.view.topAnchor.constraint(equalTo: margins.topAnchor).isActive = true
+        findDeviceViewController.view.bottomAnchor.constraint(equalTo: margins.bottomAnchor).isActive = true
         
-        navigationController.didMove(toParentViewController: self)
+        findDeviceViewController.didMove(toParentViewController: self)
     }
 }

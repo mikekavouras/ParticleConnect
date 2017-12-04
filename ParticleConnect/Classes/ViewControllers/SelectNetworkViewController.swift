@@ -61,8 +61,8 @@ public class SelectNetworkViewController: UIViewController,
         view.addSubview(tableView)
         
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: -15.0).isActive = true
-        tableView.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: 15.0).isActive = true
+        tableView.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
+        tableView.trailingAnchor.constraint(equalTo: margins.trailingAnchor).isActive = true
         tableView.topAnchor.constraint(equalTo: margins.topAnchor).isActive = true
         tableView.bottomAnchor.constraint(equalTo: margins.bottomAnchor).isActive = true
         

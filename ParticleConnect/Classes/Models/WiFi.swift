@@ -17,7 +17,7 @@ public class WiFi {
     
     // MARK: - Public
     
-    static var shared: WiFi? = WiFi()
+    static var shared: WiFi?
     
     // Whether or not we're currently connected to a network
     var isHostReachable = false
