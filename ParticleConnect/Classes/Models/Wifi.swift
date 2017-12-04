@@ -19,9 +19,15 @@ public class Wifi {
     
     static let shared = Wifi()
     
+    // Whether or not we're currently connected to a network
+    var isHostReachable = false
+    private let reachability = Reachability()!
+    
     public init() {
         NotificationCenter.default.addObserver(self, selector: #selector(startMonitoringConnectionInForeground), name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(startMonitoringConnectionInBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
+        
+        setupReachability()
     }
     
     public func stopMonitoringConnectionInForeground() {
@@ -35,7 +41,7 @@ public class Wifi {
         NotificationCenter.default.removeObserver(self)
     }
     
-    public static func monitorForDisconnectingNetwork(completion: @escaping () -> Void) {
+    public func monitorForDisconnectingNetwork(completion: @escaping () -> Void) {
         var retries = 0
         func connect() {
             if Wifi.isDeviceConnected(.photon) == true && retries < 10 {
@@ -52,6 +58,25 @@ public class Wifi {
             }
         }
         connect()
+    }
+    
+    public func monitorForNetworkReachability(completion: @escaping () -> Void) {
+        var retries = 0
+        func checkHostReachability() {
+            if !isHostReachable && retries < 20 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    retries += 1
+                    checkHostReachability()
+                }
+            } else {
+                if !isHostReachable {
+                    print("why aren't we connected :(")
+                } else {
+                    completion()
+                }
+            }
+        }
+        checkHostReachability()
     }
     
     /*
@@ -140,6 +165,21 @@ public class Wifi {
         NotificationCenter.default.post(name: Notification.Name.ConnectedToParticleDevice, object: state)
     }
     
+    // MARK: - Reachability
+    private func setupReachability() {
+        reachability.whenReachable = { _ in
+            self.isHostReachable = true
+        }
+        reachability.whenUnreachable = { _ in
+            self.isHostReachable = false
+        }
+        
+        do {
+            try reachability.startNotifier()
+        } catch {
+            print("Unable to start notifier")
+        }
+    }
     
     // MARK: - Helper
     

@@ -12,6 +12,8 @@ public class FindDeviceViewController: UIViewController {
     
     let loaderView = LoaderView(frame: .zero)
     
+    let thing: LoadingRepresentable & UIView = LoaderView(frame: .zero)
+    
     fileprivate var communicationManager: DeviceCommunicationManager?
     private var retryCount = 0
     
@@ -69,7 +71,6 @@ public class FindDeviceViewController: UIViewController {
         
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
     }
-    
     
     // MARK: Navigation
     

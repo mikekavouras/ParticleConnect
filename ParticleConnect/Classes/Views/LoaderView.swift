@@ -8,10 +8,65 @@
 
 import UIKit
 
-internal class LoaderView: UIView {
-    let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
+protocol LoadingRepresentable {
+    func show(_ text: String)
+    func hide(_ text: String?)
+    func setText(_ text: String)
+}
+
+extension LoadingRepresentable where Self: UIView {
+    func hide(_ text: String? = nil) {}
+}
+
+internal class LoaderView: UIView, LoadingRepresentable {
     
-    let textLabel: UILabel = {
+    // MARK: - Public
+    
+    func show(_ text: String) {
+        textLabel.text = text
+        activityIndicator.startAnimating()
+        
+        UIView.animate(withDuration: 0.3) {
+            self.alpha = 1.0
+        }
+    }
+    
+    func hide(_ text: String? = nil) {
+        let fadeOut = {
+            UIView.animate(withDuration: 0.3, animations: {
+                self.alpha = 0.0
+            }) { _ in
+                self.activityIndicator.stopAnimating()
+            }
+        }
+        
+        if let message = text {
+            setText(message)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                fadeOut()
+            }
+        } else {
+            fadeOut()
+        }
+        
+    }
+    
+    func setText(_ text: String) {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.textLabel.alpha = 0.0
+        }) { _ in
+            self.textLabel.text = text
+            UIView.animate(withDuration: 0.3, animations: {
+                self.textLabel.alpha = 1.0
+            })
+        }
+    }
+
+    // MARK - Private
+    
+    private let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
+    
+    private let textLabel: UILabel = {
         let label = UILabel(frame: .zero)
         label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         label.textColor = .white
@@ -20,7 +75,7 @@ internal class LoaderView: UIView {
         return label
     }()
     
-    let stackView: UIStackView = {
+    private let stackView: UIStackView = {
         let sv = UIStackView()
         sv.alignment = .fill
         sv.axis = .vertical
@@ -79,43 +134,4 @@ internal class LoaderView: UIView {
         textLabel.translatesAutoresizingMaskIntoConstraints = false
     }
     
-    func show(_ initialText: String) {
-        textLabel.text = initialText
-        activityIndicator.startAnimating()
-            
-        UIView.animate(withDuration: 0.3) {
-            self.alpha = 1.0
-        }
-    }
-    
-    func hide(_ optionalMessage: String? = nil) {
-        let fadeOut = {
-            UIView.animate(withDuration: 0.3, animations: {
-                self.alpha = 0.0
-            }) { _ in
-                self.activityIndicator.stopAnimating()
-            }
-        }
-        
-        if let message = optionalMessage {
-            setText(message)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                fadeOut()
-            }
-        } else {
-            fadeOut()
-        }
-
-    }
-    
-    func setText(_ text: String) {
-        UIView.animate(withDuration: 0.3, animations: {
-            self.textLabel.alpha = 0.0
-        }) { _ in
-            self.textLabel.text = text
-            UIView.animate(withDuration: 0.3, animations: {
-                self.textLabel.alpha = 1.0
-            })
-        }
-    }
 }
