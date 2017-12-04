@@ -13,11 +13,11 @@ extension Notification.Name {
     public static let ConnectedToParticleDevice = Notification.Name("ConnectedToParticleDevice")
 }
 
-public class Wifi {
+public class WiFi {
     
     // MARK: - Public
     
-    static let shared = Wifi()
+    static var shared: WiFi? = WiFi()
     
     // Whether or not we're currently connected to a network
     var isHostReachable = false
@@ -45,13 +45,13 @@ public class Wifi {
     public func monitorForDisconnectingNetwork(completion: @escaping () -> Void) {
         var retries = 0
         func connect() {
-            if Wifi.isDeviceConnected(.photon) == true && retries < 10 {
+            if WiFi.isDeviceConnected(.photon) == true && retries < 10 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     retries += 1
                     connect()
                 }
             } else {
-                if Wifi.isDeviceConnected(.photon) {
+                if WiFi.isDeviceConnected(.photon) {
                     print("why are we still connected to the device?")
                 } else {
                     completion()
@@ -91,7 +91,7 @@ public class Wifi {
         stopMonitoringConnectionInBackground()
         stopMonitoringConnectionInForeground()
         
-        foregroundTimer = Timer(timeInterval: Wifi.foregroundTimerInterval, target: self, selector: #selector(checkDeviceWifiConnection(timer:)), userInfo: nil, repeats: true)
+        foregroundTimer = Timer(timeInterval: WiFi.foregroundTimerInterval, target: self, selector: #selector(checkDeviceWiFiConnection(timer:)), userInfo: nil, repeats: true)
         
         RunLoop.current.add(foregroundTimer!, forMode: .commonModes)
         
@@ -127,7 +127,7 @@ public class Wifi {
         
         backgroundTimer?.invalidate()
         backgroundTimer = nil
-        backgroundTimer = Timer(timeInterval: Wifi.backgroundTimerInterval, target: self, selector: #selector(checkDeviceConnectionForNotification(timer:)), userInfo: nil, repeats: true)
+        backgroundTimer = Timer(timeInterval: WiFi.backgroundTimerInterval, target: self, selector: #selector(checkDeviceConnectionForNotification(timer:)), userInfo: nil, repeats: true)
         
         RunLoop.current.add(backgroundTimer!, forMode: .commonModes)
         
@@ -149,30 +149,30 @@ public class Wifi {
         
         let state = UIApplication.shared.applicationState
         guard state == .background || state == .inactive,
-            Wifi.isDeviceConnected(.photon) else { return }
+            WiFi.isDeviceConnected(.photon) else { return }
         
         stopMonitoringConnectionInBackground()
         
         NotificationCenter.default.post(name: Notification.Name.ConnectedToParticleDevice, object: state)
     }
     
-    @objc private func checkDeviceWifiConnection(timer: Timer) {
+    @objc private func checkDeviceWiFiConnection(timer: Timer) {
         print("checking connection in the foreground")
 
         let state = UIApplication.shared.applicationState
         guard state == .active,
-            Wifi.isDeviceConnected(.photon) else { return }
+            WiFi.isDeviceConnected(.photon) else { return }
         
         NotificationCenter.default.post(name: Notification.Name.ConnectedToParticleDevice, object: state)
     }
     
     // MARK: - Reachability
     private func setupReachability() {
-        reachability.whenReachable = { _ in
-            self.isHostReachable = true
+        reachability.whenReachable = { [weak self] _ in
+            self?.isHostReachable = true
         }
-        reachability.whenUnreachable = { _ in
-            self.isHostReachable = false
+        reachability.whenUnreachable = { [weak self] _ in
+            self?.isHostReachable = false
         }
         
         do {

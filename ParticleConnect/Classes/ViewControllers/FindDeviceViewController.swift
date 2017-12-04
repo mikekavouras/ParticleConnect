@@ -27,19 +27,22 @@ internal class FindDeviceViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        Wifi.shared.startMonitoringConnectionInForeground()
+        WiFi.shared?.startMonitoringConnectionInForeground()
         loaderView.show("Searching for device")
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        Wifi.shared.stopMonitoringConnectionInForeground()
+        WiFi.shared?.stopMonitoringConnectionInForeground()
         loaderView.hide()
+        
+        NotificationCenter.default.removeObserver(self)
     }
     
     deinit {
-        Wifi.shared.stopMonitoringConnection()
+        WiFi.shared?.stopMonitoringConnection()
+        WiFi.shared = nil
     }
     
     // MARK: Setup
@@ -49,6 +52,12 @@ internal class FindDeviceViewController: UIViewController {
         
         setupLoaderView()
         registerForLocalNotifications()
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "dismiss", style: .plain, target: self, action: #selector(dismissSelf))
+    }
+    
+    @objc private func dismissSelf() {
+        dismiss(animated: true, completion: nil)
     }
     
     private func setupLoaderView() {
@@ -88,7 +97,7 @@ internal class FindDeviceViewController: UIViewController {
             displayLocalNotification()
         }
         if state == .active {
-            Wifi.shared.stopMonitoringConnection()
+            WiFi.shared?.stopMonitoringConnection()
             print("connected in the foreground")
             
             loaderView.setText("Getting device ID")

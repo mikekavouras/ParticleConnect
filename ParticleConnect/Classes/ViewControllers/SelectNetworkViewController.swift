@@ -157,9 +157,9 @@ extension SelectNetworkViewController {
         transferManager = nil // we're done using this
         loaderView.setText("Connecting to network")
         
-        Wifi.shared.monitorForDisconnectingNetwork {
+        WiFi.shared?.monitorForDisconnectingNetwork {
             self.loaderView.hide("Connected!")
-            Wifi.shared.monitorForNetworkReachability {
+            WiFi.shared?.monitorForNetworkReachability {
                 NotificationCenter.default.post(name: Notification.Name.ParticleConnectNewDeviceConnectedSuccess, object: nil)
             }
         }
