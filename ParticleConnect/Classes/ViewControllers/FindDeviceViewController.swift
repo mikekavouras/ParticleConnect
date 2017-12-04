@@ -10,12 +10,9 @@ import UserNotifications
 
 public class FindDeviceViewController: UIViewController {
     
-    let loaderView = LoaderView(frame: .zero)
-    
-    let thing: LoadingRepresentable & UIView = LoaderView(frame: .zero)
+    let loaderView: LoadingRepresentable & UIView = LoaderView(frame: .zero)
     
     fileprivate var communicationManager: DeviceCommunicationManager?
-    private var retryCount = 0
     
     // MARK: Life cycle
     
@@ -102,6 +99,7 @@ public class FindDeviceViewController: UIViewController {
         }
     }
     
+    private var retry = false
     private func getDeviceId(completion: @escaping (String) -> Void) {
         communicationManager = DeviceCommunicationManager()
         communicationManager?.sendCommand(Command.Device.self) { [weak self] result in
@@ -112,14 +110,16 @@ public class FindDeviceViewController: UIViewController {
             case .failure(let error):
                 print(error)
                 if error == ConnectionError.timeout {
-                    if self != nil && self!.retryCount < 2 {
-                        self?.retryCount += 1
+                    if self != nil && !self!.retry {
+                        self?.retry = true
                         self?.fetchDeviceId()
                     } else {
-                        self?.showFailureAlert("Could not get the device ID (timeout)")
+                        guard let viewController = self else { return }
+                        UI.presentBasicAlert(in: viewController, message: "Could not get the device ID (timeout)")
                     }
                 } else {
-                    self?.showFailureAlert("Could not get the device ID")
+                    guard let viewController = self else { return }
+                    UI.presentBasicAlert(in: viewController, message: "Could not get the device ID")
                 }
             }
         }
@@ -135,21 +135,9 @@ public class FindDeviceViewController: UIViewController {
                 print("public key: \(result)")
                 completion()
             case .failure:
-                self?.showFailureAlert("Could not get the public key")
+                guard let viewController = self else { return }
+                UI.presentBasicAlert(in: viewController, message: "Could not get the public key")
             }
         }
     }
-    
-    // MARK: -
-    
-    private func showFailureAlert(_ message: String) {
-        let action = UIAlertAction(title: "Damn", style: .default)
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        
-        alert.addAction(action)
-        
-        present(alert, animated: true, completion: nil)
-    }
 }
-
-
