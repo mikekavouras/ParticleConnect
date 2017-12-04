@@ -108,7 +108,7 @@ public class FindDeviceViewController: UIViewController {
                 self?.communicationManager = nil
                 completion(value.deviceId)
             case .failure(let error):
-                print(error)
+                self?.communicationManager = nil
                 if error == ConnectionError.timeout {
                     if self != nil && !self!.retry {
                         self?.retry = true
@@ -135,6 +135,7 @@ public class FindDeviceViewController: UIViewController {
                 print("public key: \(result)")
                 completion()
             case .failure:
+                self?.communicationManager = nil
                 guard let viewController = self else { return }
                 UI.presentBasicAlert(in: viewController, message: "Could not get the public key")
             }
