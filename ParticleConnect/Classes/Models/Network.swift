@@ -117,6 +117,10 @@ public struct Network: Equatable, Hashable {
         return request
     }
     
+    mutating func setPassword(_ password: String) {
+        self.password = password
+    }
+    
     // MARK: - Hashable
     
     public var hashValue: Int {

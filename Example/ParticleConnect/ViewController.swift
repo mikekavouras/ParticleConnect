@@ -10,15 +10,22 @@ import UIKit
 import ParticleConnect
 
 class ViewController: UIViewController {
-
+    var shownWizard = false
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        let viewController = FindDeviceViewController()
-        viewController.view.backgroundColor = .white
-        
-        let navigationController = UINavigationController(rootViewController: viewController)
-        present(navigationController, animated: true, completion: nil)
+    
+        if !shownWizard {
+            shownWizard = true
+            let viewController = ParticleConnectViewController()
+            present(viewController, animated: true, completion: nil)
+            
+            NotificationCenter.default.addObserver(self, selector: #selector(dismissWizard(notification:)), name: Notification.Name.ParticleConnectNewDeviceConnectedSuccess, object: nil)
+        }
+    }
+    
+    @objc private func dismissWizard(notification: Notification) {
+        dismiss(animated: true, completion: nil)
     }
 }
 

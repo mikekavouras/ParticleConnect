@@ -86,7 +86,7 @@ public class DeviceCommunicationManager: DeviceConnectionDelegate {
         
         // TODO: refer to original source
         
-        if !Wifi.isDeviceConnected(.photon) {
+        if !WiFi.isDeviceConnected(.photon) {
             return false
         }
         

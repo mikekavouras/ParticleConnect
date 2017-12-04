@@ -8,7 +8,7 @@
 import UIKit
 import UserNotifications
 
-public class FindDeviceViewController: UIViewController {
+internal class FindDeviceViewController: UIViewController {
     
     let loaderView: LoadingRepresentable & UIView = LoaderView(frame: .zero)
     
@@ -16,43 +16,56 @@ public class FindDeviceViewController: UIViewController {
     
     // MARK: Life cycle
     
-    public override func viewDidLoad() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { allowed, error in }
-        UIApplication.shared.registerForRemoteNotifications()
+    override func viewDidLoad() {
+        super.viewDidLoad()
         
         NotificationCenter.default.addObserver(self, selector: #selector(onConnectionHandler(notification:)), name: Notification.Name.ConnectedToParticleDevice, object: nil)
         
         setup()
     }
     
-    override public func viewDidAppear(_ animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        Wifi.shared.startMonitoringConnectionInForeground()
-        
+        WiFi.shared?.startMonitoringConnectionInForeground()
         loaderView.show("Searching for device")
     }
     
-    override public func viewWillDisappear(_ animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        Wifi.shared.stopMonitoringConnectionInForeground()
         
+        WiFi.shared?.stopMonitoringConnectionInForeground()
         loaderView.hide()
+        
+        NotificationCenter.default.removeObserver(self)
     }
     
     deinit {
-        Wifi.shared.stopMonitoringConnection()
+        WiFi.shared?.stopMonitoringConnection()
+        WiFi.shared = nil
     }
     
     // MARK: Setup
     
     private func setup() {
+        view.backgroundColor = .white
+        
+        setupLoaderView()
+        registerForLocalNotifications()
+    }
+    
+    private func setupLoaderView() {
         view.addSubview(loaderView)
         
         let margin = view.layoutMarginsGuide
         loaderView.centerYAnchor.constraint(equalTo: margin.centerYAnchor, constant: -60).isActive = true
         loaderView.centerXAnchor.constraint(equalTo: margin.centerXAnchor).isActive = true
         loaderView.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func registerForLocalNotifications() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { allowed, error in }
+        UIApplication.shared.registerForRemoteNotifications()
     }
     
     // MARK: Notification
@@ -78,7 +91,7 @@ public class FindDeviceViewController: UIViewController {
             displayLocalNotification()
         }
         if state == .active {
-            Wifi.shared.stopMonitoringConnection()
+            WiFi.shared?.stopMonitoringConnection()
             print("connected in the foreground")
             
             loaderView.setText("Getting device ID")
