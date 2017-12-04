@@ -8,16 +8,18 @@
 import UIKit
 
 class UI {
-    static func presentPasswordDialog(`for` network: Network, `in` viewController: UIViewController, completion: @escaping (UIAlertController) -> Void) {
+    static func presentPasswordDialog(`for` network: Network, `in` viewController: UIViewController, completion: @escaping (UITextField?) -> Void) {
         let alertController = UIAlertController(title: "Enter Password", message: "Enter the password for \(network.ssid)", preferredStyle: .alert)
-        let passwordTextField = { (textField: UITextField) -> Void in
+        var passwordTextField: UITextField?
+        
+        alertController.addTextField { textField in
+            passwordTextField = textField
             textField.placeholder = "Password"
             textField.isSecureTextEntry = true
         }
-        alertController.addTextField(configurationHandler: passwordTextField)
         
         let submitAction = UIAlertAction(title: "Join", style: .default) { _ in
-            completion(alertController)
+            completion(passwordTextField)
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
         

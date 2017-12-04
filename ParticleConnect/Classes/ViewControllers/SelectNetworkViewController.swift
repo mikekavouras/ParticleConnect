@@ -54,7 +54,7 @@ public class SelectNetworkViewController: UIViewController,
         setupTableView()
         setupLoaderView()
     }
-    
+
     private func setupTableView() {
         let margins = view.layoutMarginsGuide
         
@@ -128,18 +128,15 @@ extension SelectNetworkViewController {
 
 extension SelectNetworkViewController {
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let network = networks[indexPath.row]
+        var network = networks[indexPath.row]
         
         if network.securityType != .open {
-            UI.presentPasswordDialog(for: network, in: self) { alertController in
-                if let textFields = alertController.textFields,
-                    let passwordField = textFields.first,
-                    let password = passwordField.text
+            UI.presentPasswordDialog(for: network, in: self) { [weak self] passwordTextField in
+                if let textField = passwordTextField,
+                    let password = textField.text
                 {
-                    var mutableNetwork = network
-                    mutableNetwork.password = password
-                    
-                    self.transferCredentials(for: mutableNetwork)
+                    network.setPassword(password)
+                    self?.transferCredentials(for: network)
                 }
             }
         } else {
@@ -156,7 +153,7 @@ extension SelectNetworkViewController {
     func networkCredentialsTransferManagerDidConnectDeviceToNetwork(_ manager: NetworkCredentialsTransferManager) {
         transferManager = nil // we're done using this
         loaderView.setText("Connecting to network")
-        
+
         WiFi.shared?.monitorForDisconnectingNetwork {
             self.loaderView.hide("Connected!")
             WiFi.shared?.monitorForNetworkReachability {

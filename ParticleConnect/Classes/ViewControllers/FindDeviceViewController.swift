@@ -52,12 +52,6 @@ internal class FindDeviceViewController: UIViewController {
         
         setupLoaderView()
         registerForLocalNotifications()
-        
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "dismiss", style: .plain, target: self, action: #selector(dismissSelf))
-    }
-    
-    @objc private func dismissSelf() {
-        dismiss(animated: true, completion: nil)
     }
     
     private func setupLoaderView() {
