@@ -22,7 +22,7 @@ pod 'ParticleConnect'
 
 ## Author
 
-d8915d4c64a5f9654c7e3ca0a00fcac82db05acc, kavourasm@gmail.com
+Mike Kavouras
 
 ## License
 
