@@ -125,6 +125,7 @@ internal class FindDeviceViewController: UIViewController {
             self?.getPublicKey { [weak self] in
                 guard let weakSelf = self else { return }
                 let viewController = SelectNetworkViewController(loaderClass: type(of: weakSelf.loaderView))
+                viewController.deviceId = deviceId
                 weakSelf.navigationController?.pushViewController(viewController, animated: true)
             }
         }

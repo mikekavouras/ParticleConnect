@@ -12,6 +12,8 @@ internal class SelectNetworkViewController: UIViewController,
     UITableViewDelegate,
     NetworkCredentialsTransferManagerDelegate {
     
+    var deviceId: String = ""
+    
     // UI
     private let tableView = UITableView(frame: .zero, style: .plain)
     private let loaderView: LoaderClass
@@ -169,10 +171,10 @@ extension SelectNetworkViewController {
         transferManager = nil // we're done using this
         loaderView.setText("Connecting to network")
 
-        WiFi.shared?.monitorForDisconnectingNetwork {
+        WiFi.shared?.monitorForDisconnectingNetwork { [unowned self] in
             self.loaderView.hide("Connected!")
             WiFi.shared?.monitorForNetworkReachability {
-                NotificationCenter.default.post(name: Notification.Name.ParticleConnectNewDeviceConnectedSuccess, object: nil)
+                NotificationCenter.default.post(name: Notification.Name.ParticleConnectNewDeviceConnectedSuccess, object: ["device_id" : self.deviceId])
             }
         }
     }
