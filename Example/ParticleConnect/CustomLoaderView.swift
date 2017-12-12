@@ -1,24 +1,15 @@
-
 //
-//  LoaderView.swift
-//  Nimble
+//  CustomLoaderView.swift
+//  ParticleConnect_Example
 //
-//  Created by Mike on 12/1/17.
+//  Created by Mike on 12/4/17.
+//  Copyright © 2017 CocoaPods. All rights reserved.
 //
 
 import UIKit
+import ParticleConnect
 
-public protocol LoadingRepresentable {
-    func show(_ text: String)
-    func hide(_ text: String?)
-    func setText(_ text: String)
-}
-
-extension LoadingRepresentable where Self: UIView {
-    func hide(_ text: String? = nil) {}
-}
-
-internal class LoaderView: UIView, LoadingRepresentable {
+class CustomLoaderView: UIView, LoadingRepresentable {
     
     // MARK: - Public
     
@@ -61,7 +52,7 @@ internal class LoaderView: UIView, LoadingRepresentable {
             })
         }
     }
-
+    
     // MARK - Private
     
     private let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
@@ -89,7 +80,7 @@ internal class LoaderView: UIView, LoadingRepresentable {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        backgroundColor = UIColor.blue.withAlphaComponent(0.7)
         layer.cornerRadius = 8.0
         alpha = 0.0
         
@@ -135,3 +126,4 @@ internal class LoaderView: UIView, LoadingRepresentable {
     }
     
 }
+

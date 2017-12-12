@@ -7,14 +7,14 @@
 
 import UIKit
 
-public class SelectNetworkViewController: UIViewController,
+internal class SelectNetworkViewController: UIViewController,
     UITableViewDataSource,
     UITableViewDelegate,
     NetworkCredentialsTransferManagerDelegate {
     
     // UI
     private let tableView = UITableView(frame: .zero, style: .plain)
-    private let loaderView = LoaderView(frame: .zero)
+    private let loaderView: LoaderClass
     
     // Communication
     fileprivate var transferManager: NetworkCredentialsTransferManager?
@@ -29,13 +29,28 @@ public class SelectNetworkViewController: UIViewController,
     
     // MARK: - Life cycle
     
-    public override func viewDidLoad() {
+    init(loaderClass: LoaderClass.Type? = nil) {
+        if let customClass = loaderClass {
+            loaderView = customClass.init(frame: .zero)
+        }
+        else {
+            loaderView = LoaderView(frame: .zero)
+        }
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
         super.viewDidLoad()
         
         setup()
     }
     
-    public override func viewDidAppear(_ animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
         loaderView.show("Looking for networks")
@@ -109,15 +124,15 @@ public class SelectNetworkViewController: UIViewController,
 // MARK: - UITableViewDataSource
 
 extension SelectNetworkViewController {
-    public func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return networks.count
     }
     
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! NetworkCell
         cell.network = networks[indexPath.row]
         return cell

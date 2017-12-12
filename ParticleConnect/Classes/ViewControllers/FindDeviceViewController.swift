@@ -10,11 +10,26 @@ import UserNotifications
 
 internal class FindDeviceViewController: UIViewController {
     
-    let loaderView: LoadingRepresentable & UIView = LoaderView(frame: .zero)
+    let loaderView: LoaderClass
     
     fileprivate var communicationManager: DeviceCommunicationManager?
     
     // MARK: Life cycle
+    
+    init(loaderClass: LoaderClass.Type? = nil) {
+        if let customClass = loaderClass {
+            loaderView = customClass.init(frame: .zero)
+        }
+        else {
+            loaderView = LoaderView(frame: .zero)
+        }
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -108,8 +123,9 @@ internal class FindDeviceViewController: UIViewController {
         getDeviceId { [weak self] deviceId in
             print("device id: \(deviceId)")
             self?.getPublicKey { [weak self] in
-                let viewController = SelectNetworkViewController()
-                self?.navigationController?.pushViewController(viewController, animated: true)
+                guard let weakSelf = self else { return }
+                let viewController = SelectNetworkViewController(loaderClass: type(of: weakSelf.loaderView))
+                weakSelf.navigationController?.pushViewController(viewController, animated: true)
             }
         }
     }

@@ -11,7 +11,21 @@ public extension Notification.Name {
     public static let ParticleConnectNewDeviceConnectedSuccess = Notification.Name("ParticleConnectNewDeviceConnectedSuccess")
 }
 
+public typealias LoaderClass = LoadingRepresentable & UIView
+
 public class ParticleConnectViewController: UIViewController {
+    
+    private let loaderClass: LoaderClass.Type?
+    
+    public init(loaderClass: LoaderClass.Type? = nil) {
+        self.loaderClass = loaderClass
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    public required init?(coder aDecoder: NSCoder) {
+        fatalError("not implemented")
+    }
     
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -20,7 +34,7 @@ public class ParticleConnectViewController: UIViewController {
     }
     
     private func setup() {
-        let findDeviceViewController = FindDeviceViewController()
+        let findDeviceViewController = FindDeviceViewController(loaderClass: loaderClass)
         
         addChildViewController(findDeviceViewController)
         view.addSubview(findDeviceViewController.view)

@@ -76,7 +76,7 @@ class ViewController: UITableViewController {
         
         switch style {
         case .viewController:
-            let viewController = ParticleConnectViewController()
+            let viewController = ParticleConnectViewController(loaderClass: CustomLoaderView.self)
             navigationController?.pushViewController(viewController, animated: true)
         case .navigationController:
             let viewController = ParticleConnectViewController()
