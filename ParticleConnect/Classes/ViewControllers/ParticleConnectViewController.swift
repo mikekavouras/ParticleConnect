@@ -11,14 +11,14 @@ public extension Notification.Name {
     public static let ParticleConnectNewDeviceConnectedSuccess = Notification.Name("ParticleConnectNewDeviceConnectedSuccess")
 }
 
-public typealias LoaderClass = LoadingRepresentable & UIView
+public typealias LoaderViewType = LoadingRepresentable & UIView
 
 public class ParticleConnectViewController: UIViewController {
     
-    private let loaderClass: LoaderClass.Type?
+    private let loaderViewType: LoaderViewType.Type?
     
-    public init(loaderClass: LoaderClass.Type? = nil) {
-        self.loaderClass = loaderClass
+    public init(loaderViewType: LoaderViewType.Type? = nil) {
+        self.loaderViewType = loaderViewType
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -34,7 +34,7 @@ public class ParticleConnectViewController: UIViewController {
     }
     
     private func setup() {
-        let findDeviceViewController = FindDeviceViewController(loaderClass: loaderClass)
+        let findDeviceViewController = FindDeviceViewController(loaderViewType: loaderViewType)
         
         addChildViewController(findDeviceViewController)
         view.addSubview(findDeviceViewController.view)

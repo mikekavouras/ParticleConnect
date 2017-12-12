@@ -16,7 +16,7 @@ internal class SelectNetworkViewController: UIViewController,
     
     // UI
     private let tableView = UITableView(frame: .zero, style: .plain)
-    private let loaderView: LoaderClass
+    private let loaderView: LoaderViewType
     
     // Communication
     fileprivate var transferManager: NetworkCredentialsTransferManager?
@@ -31,12 +31,12 @@ internal class SelectNetworkViewController: UIViewController,
     
     // MARK: - Life cycle
     
-    init(loaderClass: LoaderClass.Type? = nil) {
-        if let customClass = loaderClass {
-            loaderView = customClass.init(frame: .zero)
+    init(loaderViewType: LoaderViewType.Type? = nil) {
+        if let customType = loaderViewType {
+            loaderView = customType.init(frame: .zero)
         }
         else {
-            loaderView = LoaderView(frame: .zero)
+            loaderView = DefaultLoaderView(frame: .zero)
         }
         
         super.init(nibName: nil, bundle: nil)

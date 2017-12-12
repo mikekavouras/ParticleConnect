@@ -18,7 +18,7 @@ extension LoadingRepresentable where Self: UIView {
     func hide(_ text: String? = nil) {}
 }
 
-internal class LoaderView: UIView, LoadingRepresentable {
+internal class DefaultLoaderView: UIView, LoadingRepresentable {
     
     // MARK: - Public
     

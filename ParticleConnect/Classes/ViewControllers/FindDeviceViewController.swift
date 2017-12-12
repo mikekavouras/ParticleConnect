@@ -10,18 +10,18 @@ import UserNotifications
 
 internal class FindDeviceViewController: UIViewController {
     
-    let loaderView: LoaderClass
+    let loaderView: LoaderViewType
     
     fileprivate var communicationManager: DeviceCommunicationManager?
     
     // MARK: Life cycle
     
-    init(loaderClass: LoaderClass.Type? = nil) {
-        if let customClass = loaderClass {
-            loaderView = customClass.init(frame: .zero)
+    init(loaderViewType: LoaderViewType.Type? = nil) {
+        if let customType = loaderViewType {
+            loaderView = customType.init(frame: .zero)
         }
         else {
-            loaderView = LoaderView(frame: .zero)
+            loaderView = DefaultLoaderView(frame: .zero)
         }
         
         super.init(nibName: nil, bundle: nil)
@@ -124,7 +124,7 @@ internal class FindDeviceViewController: UIViewController {
             print("device id: \(deviceId)")
             self?.getPublicKey { [weak self] in
                 guard let weakSelf = self else { return }
-                let viewController = SelectNetworkViewController(loaderClass: type(of: weakSelf.loaderView))
+                let viewController = SelectNetworkViewController(loaderViewType: type(of: weakSelf.loaderView))
                 viewController.deviceId = deviceId
                 weakSelf.navigationController?.pushViewController(viewController, animated: true)
             }

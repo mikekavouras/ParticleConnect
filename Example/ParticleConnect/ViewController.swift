@@ -13,9 +13,10 @@ enum PresentationStyle: String {
     case viewController = "view controller"
     case navigationController = "navigation controller"
     case customView = "custom view"
+    case customLoader = "custom loader"
     
     static var all: [PresentationStyle] {
-        return [.viewController, .navigationController, .customView]
+        return [.viewController, .navigationController, .customView, .customLoader]
     }
 }
 
@@ -42,7 +43,7 @@ class ViewController: UITableViewController {
         guard let style = selectedStyle else { return }
         
         switch style {
-        case .viewController, .customView:
+        case .viewController, .customView, .customLoader:
             navigationController?.popToRootViewController(animated: true)
         case .navigationController:
             dismiss(animated: true, completion: nil)
@@ -76,13 +77,16 @@ class ViewController: UITableViewController {
         
         switch style {
         case .viewController:
-            let viewController = ParticleConnectViewController(loaderClass: CustomLoaderView.self)
+            let viewController = ParticleConnectViewController()
             navigationController?.pushViewController(viewController, animated: true)
         case .navigationController:
             let viewController = ParticleConnectViewController()
             let navigationController = UINavigationController(rootViewController: viewController)
             viewController.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Dismiss", style: .plain, target: self, action: #selector(dismissModal))
             present(navigationController, animated: true, completion: nil)
+        case .customLoader:
+            let viewController = ParticleConnectViewController(loaderViewType: CustomLoaderView.self)
+            navigationController?.pushViewController(viewController, animated: true)
         default:
             performSegue(withIdentifier: "CustomViewController", sender: self)
             break
