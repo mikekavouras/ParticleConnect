@@ -14,15 +14,11 @@ public protocol LoadingRepresentable {
     func setText(_ text: String)
 }
 
-extension LoadingRepresentable where Self: UIView {
-    func hide(_ text: String? = nil) {}
-}
-
-internal class DefaultLoaderView: UIView, LoadingRepresentable {
+open class ParticleLoaderView: UIView, LoadingRepresentable {
     
     // MARK: - Public
     
-    func show(_ text: String) {
+    public func show(_ text: String) {
         textLabel.text = text
         activityIndicator.startAnimating()
         
@@ -31,7 +27,7 @@ internal class DefaultLoaderView: UIView, LoadingRepresentable {
         }
     }
     
-    func hide(_ text: String? = nil) {
+    public func hide(_ text: String? = nil) {
         let fadeOut = {
             UIView.animate(withDuration: 0.3, animations: {
                 self.alpha = 0.0
@@ -51,7 +47,7 @@ internal class DefaultLoaderView: UIView, LoadingRepresentable {
         
     }
     
-    func setText(_ text: String) {
+    public func setText(_ text: String) {
         UIView.animate(withDuration: 0.3, animations: {
             self.textLabel.alpha = 0.0
         }) { _ in
@@ -88,15 +84,15 @@ internal class DefaultLoaderView: UIView, LoadingRepresentable {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
-        backgroundColor = UIColor.black.withAlphaComponent(0.7)
+
         layer.cornerRadius = 8.0
         alpha = 0.0
+        backgroundColor = UIColor.black.withAlphaComponent(0.7)
         
         setup()
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     

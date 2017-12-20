@@ -85,7 +85,7 @@ class ViewController: UITableViewController {
             viewController.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Dismiss", style: .plain, target: self, action: #selector(dismissModal))
             present(navigationController, animated: true, completion: nil)
         case .customLoader:
-            let viewController = ParticleConnectViewController(loaderViewType: CustomLoaderView.self)
+            let viewController = ParticleConnectViewController(loaderViewType: SlackLoaderView.self)
             navigationController?.pushViewController(viewController, animated: true)
         default:
             performSegue(withIdentifier: "CustomViewController", sender: self)

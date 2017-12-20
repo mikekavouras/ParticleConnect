@@ -36,7 +36,7 @@ internal class SelectNetworkViewController: UIViewController,
             loaderView = customType.init(frame: .zero)
         }
         else {
-            loaderView = DefaultLoaderView(frame: .zero)
+            loaderView = ParticleLoaderView(frame: .zero)
         }
         
         super.init(nibName: nil, bundle: nil)
@@ -59,7 +59,7 @@ internal class SelectNetworkViewController: UIViewController,
         
         scanForNetworks { foundNetworks in
             self.networks = foundNetworks
-            self.loaderView.hide()
+            self.loaderView.hide(nil)
         }
     }
     

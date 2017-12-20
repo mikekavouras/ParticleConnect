@@ -21,7 +21,7 @@ internal class FindDeviceViewController: UIViewController {
             loaderView = customType.init(frame: .zero)
         }
         else {
-            loaderView = DefaultLoaderView(frame: .zero)
+            loaderView = ParticleLoaderView(frame: .zero)
         }
         
         super.init(nibName: nil, bundle: nil)
@@ -50,7 +50,7 @@ internal class FindDeviceViewController: UIViewController {
         super.viewWillDisappear(animated)
         
         WiFi.shared?.stopMonitoringConnectionInForeground()
-        loaderView.hide()
+        loaderView.hide(nil)
         
         NotificationCenter.default.removeObserver(self)
     }
