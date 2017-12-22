@@ -12,6 +12,12 @@ internal class FindDeviceViewController: UIViewController {
     
     let loaderView: LoaderViewType
     
+    var theme: Theme = .light {
+        didSet {
+//            updateThemeUI()
+        }
+    }
+    
     fileprivate var communicationManager: DeviceCommunicationManager?
     
     // MARK: Life cycle
@@ -68,7 +74,6 @@ internal class FindDeviceViewController: UIViewController {
         WiFi.shared = WiFi()
         
         setupLoaderView()
-        registerForLocalNotifications()
     }
     
     private func setupLoaderView() {
@@ -79,11 +84,7 @@ internal class FindDeviceViewController: UIViewController {
         loaderView.centerXAnchor.constraint(equalTo: margin.centerXAnchor).isActive = true
         loaderView.translatesAutoresizingMaskIntoConstraints = false
     }
-    
-    private func registerForLocalNotifications() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { allowed, error in }
-        UIApplication.shared.registerForRemoteNotifications()
-    }
+
     
     // MARK: Notification
     

@@ -6,6 +6,12 @@
 //
 
 import UIKit
+import UserNotifications
+
+public enum Theme {
+    case light
+    case dark
+}
 
 public extension Notification.Name {
     public static let ParticleConnectNewDeviceConnectedSuccess = Notification.Name("ParticleConnectNewDeviceConnectedSuccess")
@@ -14,6 +20,8 @@ public extension Notification.Name {
 public typealias LoaderViewType = LoadingRepresentable & UIView
 
 public class ParticleConnectViewController: UIViewController {
+    
+    var theme: Theme = .light
     
     private let loaderViewType: LoaderViewType.Type?
     
@@ -34,7 +42,19 @@ public class ParticleConnectViewController: UIViewController {
     }
     
     private func setup() {
+        setupInitialViewController()
+        registerForLocalNotifications()
+    }
+    
+    
+    private func registerForLocalNotifications() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { allowed, error in }
+        UIApplication.shared.registerForRemoteNotifications()
+    }
+    
+    private func setupInitialViewController() {
         let findDeviceViewController = FindDeviceViewController(loaderViewType: loaderViewType)
+//        findDeviceViewController.theme = theme
         
         addChildViewController(findDeviceViewController)
         view.addSubview(findDeviceViewController.view)
@@ -45,6 +65,7 @@ public class ParticleConnectViewController: UIViewController {
         findDeviceViewController.view.trailingAnchor.constraint(equalTo: margins.trailingAnchor).isActive = true
         findDeviceViewController.view.topAnchor.constraint(equalTo: margins.topAnchor).isActive = true
         findDeviceViewController.view.bottomAnchor.constraint(equalTo: margins.bottomAnchor).isActive = true
+        findDeviceViewController.view.translatesAutoresizingMaskIntoConstraints = false
         
         findDeviceViewController.didMove(toParentViewController: self)
     }
