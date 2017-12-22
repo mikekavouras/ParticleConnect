@@ -50,7 +50,12 @@ class SlackLoaderView: UIView, LoadingRepresentable {
     func setText(_ text: String) {}
     
     private func animate() {
-        let thirdAnimation = UIViewPropertyAnimator(duration: animationDuration, curve: .easeInOut) {
+        let controlPoint1: CGPoint = .init(x: 0.80, y: 0.0)
+        let controlPoint2: CGPoint = .init(x: 0.2, y: 1.0)
+        let cubicTimingParameters: UITimingCurveProvider = UICubicTimingParameters(controlPoint1: controlPoint1, controlPoint2: controlPoint2)
+        
+        let thirdAnimation = UIViewPropertyAnimator(duration: animationDuration, timingParameters: cubicTimingParameters)
+        thirdAnimation.addAnimations {
             self.blueView.frame = .init(x: self.frameWidth - self.padding, y: self.padding, width: self.lineWidth, height: self.lineWidth)
             self.greenView.frame = .init(x: self.padding, y: self.lineWidth, width: self.lineWidth, height: self.lineWidth)
             self.redView.frame = .init(x: self.lineWidth, y: self.frameWidth - self.padding - self.lineWidth, width: self.lineWidth, height: self.lineWidth)
@@ -61,7 +66,8 @@ class SlackLoaderView: UIView, LoadingRepresentable {
             self.animate()
         }
         
-        let secondAnimation = UIViewPropertyAnimator(duration: animationDuration, curve: .easeInOut) {
+        let secondAnimation = UIViewPropertyAnimator(duration: animationDuration, timingParameters: cubicTimingParameters)
+        secondAnimation.addAnimations {
             self.blueView.frame = .init(x: self.lineWidth, y: self.padding, width: self.lineWidth, height: self.lineWidth)
             self.greenView.frame = .init(x: self.padding, y: self.frameWidth - self.padding, width: self.lineWidth, height: self.lineWidth)
             self.redView.frame = .init(x: self.frameWidth - self.padding, y: self.frameWidth - self.padding - self.lineWidth, width: self.lineWidth, height: self.lineWidth)
@@ -69,17 +75,18 @@ class SlackLoaderView: UIView, LoadingRepresentable {
         }
         
         secondAnimation.addCompletion { _  in
-            thirdAnimation.startAnimation()
+            thirdAnimation.startAnimation(afterDelay: 0.14)
         }
         
-        let firstAnimation = UIViewPropertyAnimator(duration: animationDuration, curve: .easeInOut) {
+        let firstAnimation = UIViewPropertyAnimator(duration: animationDuration, timingParameters: cubicTimingParameters)
+        firstAnimation.addAnimations {
             self.blueView.frame = .init(x: self.lineWidth, y: self.padding, width: self.frameWidth - self.padding, height: self.lineWidth)
             self.greenView.frame = .init(x: self.padding, y: self.lineWidth, width: self.lineWidth, height: self.frameWidth - self.padding)
             self.redView.frame = .init(x: self.lineWidth, y: self.frameWidth - self.padding - self.lineWidth, width: self.frameWidth - self.padding, height: self.lineWidth)
             self.yellowView.frame = .init(x: self.frameWidth - self.padding - self.lineWidth, y: self.lineWidth, width: self.lineWidth, height: self.frameWidth - self.padding)
         }
         firstAnimation.addCompletion { _ in
-            secondAnimation.startAnimation()
+            secondAnimation.startAnimation(afterDelay: 0.14)
         }
         
         firstAnimation.startAnimation()
