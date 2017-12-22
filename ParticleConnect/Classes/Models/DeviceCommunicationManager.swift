@@ -10,6 +10,18 @@ protocol DeviceCommunicationManagerDelegate: class {
     func deviceCommunicationManagerFailedToReceiveDeviceId(deviceCommunicationManager: DeviceCommunicationManager)
     func deviceCommunicationManagerDidReceivePublicKey(deviceCommunicationManager: DeviceCommunicationManager)
     func deviceCommunicationManagerFailedToReceivePublicKey(deviceCommunicationManager: DeviceCommunicationManager)
+    func deviceCommunicationManager(deviceCommunicationManager: DeviceCommunicationManager, didReceiveNetworks networks: [Network])
+    func deviceCommunicationManagerFailedToReceiveNetworks(deviceCommunicationManager: DeviceCommunicationManager)
+}
+
+// make everything optional
+extension DeviceCommunicationManagerDelegate where Self: UIViewController {
+    func deviceCommunicationManager(deviceCommunicationManager: DeviceCommunicationManager, didReceiveDeviceId deviceId: String) {}
+    func deviceCommunicationManagerFailedToReceiveDeviceId(deviceCommunicationManager: DeviceCommunicationManager) {}
+    func deviceCommunicationManagerDidReceivePublicKey(deviceCommunicationManager: DeviceCommunicationManager) {}
+    func deviceCommunicationManagerFailedToReceivePublicKey(deviceCommunicationManager: DeviceCommunicationManager) {}
+    func deviceCommunicationManager(deviceCommunicationManager: DeviceCommunicationManager, didReceiveNetworks networks: [Network]) {}
+    func deviceCommunicationManagerFailedToReceiveNetworks(deviceCommunicationManager: DeviceCommunicationManager) {}
 }
 
 public class DeviceCommunicationManager: DeviceConnectionDelegate {
@@ -85,6 +97,19 @@ public class DeviceCommunicationManager: DeviceConnectionDelegate {
                 weakSelf.delegate?.deviceCommunicationManagerDidReceivePublicKey(deviceCommunicationManager: weakSelf)
             case .failure:
                 weakSelf.delegate?.deviceCommunicationManagerFailedToReceivePublicKey(deviceCommunicationManager: weakSelf)
+            }
+        }
+    }
+    
+    public func scanForNetworks() {
+        sendCommand(Command.ScanAP.self) { [weak self] result in
+            guard let weakSelf = self else { return }
+            
+            switch result {
+            case .success(let list):
+                weakSelf.delegate?.deviceCommunicationManager(deviceCommunicationManager: weakSelf, didReceiveNetworks: list)
+            case .failure:
+                weakSelf.delegate?.deviceCommunicationManagerFailedToReceiveNetworks(deviceCommunicationManager: weakSelf)
             }
         }
     }

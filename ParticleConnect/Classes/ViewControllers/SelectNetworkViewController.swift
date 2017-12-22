@@ -10,6 +10,7 @@ import UIKit
 internal class SelectNetworkViewController: UIViewController,
     UITableViewDataSource,
     UITableViewDelegate,
+    DeviceCommunicationManagerDelegate,
     NetworkCredentialsTransferManagerDelegate {
     
     var deviceId: String = ""
@@ -20,7 +21,7 @@ internal class SelectNetworkViewController: UIViewController,
     
     // Communication
     fileprivate var transferManager: NetworkCredentialsTransferManager?
-    fileprivate var communicationManager: DeviceCommunicationManager? = DeviceCommunicationManager()
+    fileprivate var communicationManager: DeviceCommunicationManager?
     
     // Internal data
     fileprivate var networks: [Network] = [] {
@@ -57,10 +58,7 @@ internal class SelectNetworkViewController: UIViewController,
         
         loaderView.show("Looking for networks")
         
-        scanForNetworks { foundNetworks in
-            self.networks = foundNetworks
-            self.loaderView.hide(nil)
-        }
+        scanForNetworks()
     }
     
     // MARK: - Setup
@@ -99,19 +97,12 @@ internal class SelectNetworkViewController: UIViewController,
         loaderView.centerYAnchor.constraint(equalTo: margins.centerYAnchor, constant: -50.0).isActive = true
     }
     
-    private func scanForNetworks(completion: @escaping ([Network]) -> Void) {
+    private func scanForNetworks() {
         
         // TODO: Retry logic (auto or manual)
-    
-        communicationManager?.sendCommand(Command.ScanAP.self) { result in
-            switch result {
-            case .success(let list):
-                completion(list)
-            case .failure(let error):
-                print(error)
-            }
-            self.communicationManager = nil
-        }
+        communicationManager = DeviceCommunicationManager()
+        communicationManager?.delegate = self
+        communicationManager?.scanForNetworks()
     }
     
     private func transferCredentials(`for` network: Network) {
@@ -161,6 +152,20 @@ extension SelectNetworkViewController {
         }
         
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+// MARK: - DeviceCommunicationManagerDelegate
+
+extension SelectNetworkViewController {
+    func deviceCommunicationManager(deviceCommunicationManager: DeviceCommunicationManager, didReceiveNetworks networks: [Network]) {
+        self.networks = networks
+        self.loaderView.hide(nil)
+        communicationManager = nil
+    }
+    
+    func deviceCommunicationManagerFailedToReceiveNetworks(deviceCommunicationManager: DeviceCommunicationManager) {
+        UI.presentBasicAlert(in: self, message: "Did not find any WiFi networks")
     }
 }
 

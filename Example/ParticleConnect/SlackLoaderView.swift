@@ -17,19 +17,19 @@ class SlackLoaderView: UIView, LoadingRepresentable {
         addSubview(greenView)
         addSubview(redView)
         addSubview(yellowView)
-        
+
         heightAnchor.constraint(equalToConstant: frameWidth).isActive = true
         widthAnchor.constraint(equalToConstant: frameWidth).isActive = true
-        
+
         setupViews()
-        
+
         let timer = Timer(timeInterval: 0.1, repeats: false) { _ in
             self.animate()
         }
         RunLoop.current.add(timer, forMode: .commonModes)
-        
+
         transform = transform.rotated(by: -0.2)
-        
+
         backgroundColor = UIColor.white.withAlphaComponent(0.7)
         layer.cornerRadius = 8.0
         alpha = 0.0
@@ -62,8 +62,8 @@ class SlackLoaderView: UIView, LoadingRepresentable {
             self.yellowView.frame = .init(x: self.frameWidth - self.padding - self.lineWidth, y: self.frameWidth - self.padding, width: self.lineWidth, height: self.lineWidth)
         }
         
-        thirdAnimation.addCompletion { _ in
-            self.animate()
+        thirdAnimation.addCompletion { [weak self] _ in
+            self?.animate()
         }
         
         let secondAnimation = UIViewPropertyAnimator(duration: animationDuration, timingParameters: cubicTimingParameters)
