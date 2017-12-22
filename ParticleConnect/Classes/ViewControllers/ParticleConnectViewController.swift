@@ -58,14 +58,15 @@ public class ParticleConnectViewController: UIViewController {
         
         addChildViewController(findDeviceViewController)
         view.addSubview(findDeviceViewController.view)
+        findDeviceViewController.view.frame = view.bounds
         
-        // auto layout
-        let margins = view.layoutMarginsGuide
-        findDeviceViewController.view.leadingAnchor.constraint(equalTo: margins.leadingAnchor).isActive = true
-        findDeviceViewController.view.trailingAnchor.constraint(equalTo: margins.trailingAnchor).isActive = true
-        findDeviceViewController.view.topAnchor.constraint(equalTo: margins.topAnchor).isActive = true
-        findDeviceViewController.view.bottomAnchor.constraint(equalTo: margins.bottomAnchor).isActive = true
-        findDeviceViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        // TODO: Figure out auto layout
+//        let margins = view.layoutMarginsGuide
+//        findDeviceViewController.view.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: -16).isActive = true
+//        findDeviceViewController.view.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: 16).isActive = true
+//        findDeviceViewController.view.topAnchor.constraint(equalTo: margins.topAnchor, constant: -16).isActive = true
+//        findDeviceViewController.view.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: 16).isActive = true
+//        findDeviceViewController.view.translatesAutoresizingMaskIntoConstraints = false
         
         findDeviceViewController.didMove(toParentViewController: self)
     }

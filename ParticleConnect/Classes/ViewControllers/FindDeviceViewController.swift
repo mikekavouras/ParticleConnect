@@ -8,7 +8,7 @@
 import UIKit
 import UserNotifications
 
-internal class FindDeviceViewController: UIViewController {
+internal class FindDeviceViewController: UIViewController, DeviceCommunicationManagerDelegate {
     
     let loaderView: LoaderViewType
     
@@ -40,15 +40,18 @@ internal class FindDeviceViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(onConnectionHandler(notification:)), name: Notification.Name.ConnectedToParticleDevice, object: nil)
-        
         setup()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        communicationManager = DeviceCommunicationManager()
+        communicationManager?.delegate = self
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(onDeviceWiFiConnectionHandler(notification:)), name: Notification.Name.ConnectedToParticleDevice, object: nil)
         WiFi.shared?.startMonitoringConnectionInForeground()
+        
         loaderView.show("Searching for device")
     }
     
@@ -57,6 +60,7 @@ internal class FindDeviceViewController: UIViewController {
         
         WiFi.shared?.stopMonitoringConnectionInForeground()
         loaderView.hide(nil)
+        communicationManager = nil
         
         NotificationCenter.default.removeObserver(self)
     }
@@ -72,7 +76,6 @@ internal class FindDeviceViewController: UIViewController {
         view.backgroundColor = .white
         
         WiFi.shared = WiFi()
-        
         setupLoaderView()
     }
     
@@ -100,78 +103,45 @@ internal class FindDeviceViewController: UIViewController {
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
     }
     
+    
     // MARK: Navigation
     
-    @objc private func onConnectionHandler(notification: Notification) {
+    @objc private func onDeviceWiFiConnectionHandler(notification: Notification) {
         guard let state = notification.object as? UIApplicationState else { return }
         
         if state == .background || state == .inactive {
             displayLocalNotification()
         }
         if state == .active {
-            WiFi.shared?.stopMonitoringConnection()
             print("connected in the foreground")
-            
+
+            WiFi.shared?.stopMonitoringConnection()
             loaderView.setText("Getting device ID")
-            
-            fetchDeviceId()
+            communicationManager?.getDeviceId()
         }
     }
-    
-    // MARK: -
-    
-    private func fetchDeviceId() {
-        getDeviceId { [weak self] deviceId in
-            print("device id: \(deviceId)")
-            self?.getPublicKey { [weak self] in
-                guard let weakSelf = self else { return }
-                let viewController = SelectNetworkViewController(loaderViewType: type(of: weakSelf.loaderView))
-                viewController.deviceId = deviceId
-                weakSelf.navigationController?.pushViewController(viewController, animated: true)
-            }
-        }
+}
+
+// MARK - DeviceCommunicationManagerDelegate
+
+extension FindDeviceViewController {
+    func deviceCommunicationManager(deviceCommunicationManager: DeviceCommunicationManager, didReceiveDeviceId deviceId: String) {
+        print("device id: \(deviceId)")
+        communicationManager?.getPublicKey()
     }
     
-    private var retry = false
-    private func getDeviceId(completion: @escaping (String) -> Void) {
-        communicationManager = DeviceCommunicationManager()
-        communicationManager?.sendCommand(Command.Device.self) { [weak self] result in
-            switch result {
-            case .success(let value):
-                self?.communicationManager = nil
-                completion(value.deviceId)
-            case .failure(let error):
-                self?.communicationManager = nil
-                if error == ConnectionError.timeout {
-                    if self != nil && !self!.retry {
-                        self?.retry = true
-                        self?.fetchDeviceId()
-                    } else {
-                        guard let viewController = self else { return }
-                        UI.presentBasicAlert(in: viewController, message: "Could not get the device ID (timeout)")
-                    }
-                } else {
-                    guard let viewController = self else { return }
-                    UI.presentBasicAlert(in: viewController, message: "Could not get the device ID")
-                }
-            }
-        }
+    func deviceCommunicationManagerFailedToReceiveDeviceId(deviceCommunicationManager: DeviceCommunicationManager) {
+        UI.presentBasicAlert(in: self, message: "Could not get the device ID (timeout)")
     }
     
-    private func getPublicKey(completion: @escaping () -> Void) {
-        print("get public key")
-        communicationManager = DeviceCommunicationManager()
-        communicationManager!.sendCommand(Command.PublicKey.self) { [weak self] result in
-            switch result {
-            case .success:
-                self?.communicationManager = nil
-                print("public key: \(result)")
-                completion()
-            case .failure:
-                self?.communicationManager = nil
-                guard let viewController = self else { return }
-                UI.presentBasicAlert(in: viewController, message: "Could not get the public key")
-            }
-        }
+    func deviceCommunicationManagerDidReceivePublicKey(deviceCommunicationManager: DeviceCommunicationManager) {
+        print("received public key")
+        let viewController = SelectNetworkViewController(loaderViewType: type(of: self.loaderView))
+//        viewController.deviceId = deviceId
+        navigationController?.pushViewController(viewController, animated: true)
+    }
+    
+    func deviceCommunicationManagerFailedToReceivePublicKey(deviceCommunicationManager: DeviceCommunicationManager) {
+        UI.presentBasicAlert(in: self, message: "Could not get the public key")
     }
 }

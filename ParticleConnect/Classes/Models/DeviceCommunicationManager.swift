@@ -5,31 +5,25 @@
 //  Created by Mike on 12/1/17.
 //
 
+protocol DeviceCommunicationManagerDelegate: class {
+    func deviceCommunicationManager(deviceCommunicationManager: DeviceCommunicationManager, didReceiveDeviceId deviceId: String)
+    func deviceCommunicationManagerFailedToReceiveDeviceId(deviceCommunicationManager: DeviceCommunicationManager)
+    func deviceCommunicationManagerDidReceivePublicKey(deviceCommunicationManager: DeviceCommunicationManager)
+    func deviceCommunicationManagerFailedToReceivePublicKey(deviceCommunicationManager: DeviceCommunicationManager)
+}
+
 public class DeviceCommunicationManager: DeviceConnectionDelegate {
     static let ConnectionEndpointAddress = "192.168.0.1"
     static let ConnectionEndpointPortString = "5609"
     static let ConnectionEndpointPort = 5609;
+    
+    weak var delegate: DeviceCommunicationManagerDelegate?
     
     var connection: DeviceConnection?
     
     var connectionCommand: (() -> Void)?
     var completionCommand: ((ResultType<[AnyHashable: Any], ConnectionError>) -> Void)?
 
-    public func sendCommand<T: ParticleCommunicable>(_ type: T.Type, completion: @escaping (ResultType<T.ResponseType, ConnectionError>) -> Void) {
-        runCommand(onConnection: { connection in
-            connection.writeString(T.command)
-        }, onCompletion: { result in
-            switch result {
-            case .success(let json):
-                if let stuff = T.parse(json) {
-                    completion(.success(stuff))
-                }
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        })
-    }
-    
     public func configureAP(network: Network, completion: @escaping (ResultType<[AnyHashable: Any], ConnectionError>) -> Void) {
         runCommand(onConnection: { connection in
             guard let json = network.asJSON,
@@ -58,6 +52,58 @@ public class DeviceCommunicationManager: DeviceConnectionDelegate {
             connection.writeString(command)
         }, onCompletion: completion)
     }
+    
+    private var retried = false
+    public func getDeviceId() {
+        sendCommand(Command.Device.self) { [weak self] result in
+            guard let weakSelf = self else { return }
+            
+            switch result {
+            case .success(let value):
+                weakSelf.delegate?.deviceCommunicationManager(deviceCommunicationManager: weakSelf, didReceiveDeviceId: value.deviceId)
+            case .failure(let error):
+                if error == ConnectionError.timeout {
+                    if !weakSelf.retried {
+                        weakSelf.retried = true
+                        weakSelf.getDeviceId()
+                    } else {
+                        weakSelf.delegate?.deviceCommunicationManagerFailedToReceiveDeviceId(deviceCommunicationManager: weakSelf)
+                    }
+                } else {
+                    weakSelf.delegate?.deviceCommunicationManagerFailedToReceiveDeviceId(deviceCommunicationManager: weakSelf)
+                }
+            }
+        }
+    }
+    
+    public func getPublicKey() {
+        sendCommand(Command.PublicKey.self) { [weak self] result in
+            guard let weakSelf = self else { return }
+            
+            switch result {
+            case .success:
+                weakSelf.delegate?.deviceCommunicationManagerDidReceivePublicKey(deviceCommunicationManager: weakSelf)
+            case .failure:
+                weakSelf.delegate?.deviceCommunicationManagerFailedToReceivePublicKey(deviceCommunicationManager: weakSelf)
+            }
+        }
+    }
+    
+    public func sendCommand<T: ParticleCommunicable>(_ type: T.Type, completion: @escaping (ResultType<T.ResponseType, ConnectionError>) -> Void) {
+        runCommand(onConnection: { connection in
+            connection.writeString(T.command)
+        }, onCompletion: { result in
+            switch result {
+            case .success(let json):
+                if let stuff = T.parse(json) {
+                    completion(.success(stuff))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        })
+    }
+
 
     private func runCommand(onConnection: @escaping (DeviceConnection) -> Void,
                             onCompletion: @escaping (ResultType<[AnyHashable: Any], ConnectionError>) -> Void) {
@@ -81,6 +127,8 @@ public class DeviceCommunicationManager: DeviceConnectionDelegate {
             command(self.connection!)
         }
     }
+    
+    // MARK - Utility
     
     private class func canSendCommandCall() -> Bool {
         
